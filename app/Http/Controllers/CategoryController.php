@@ -113,8 +113,7 @@ class CategoryController extends Controller
 
     public function restore($id)
     {
-        $category = Category::withTrashed()->findOrFail($id);
-        $category->restore();
+        Category::onlyTrashed()->where('id', $id)->restore();
         return redirect()->route('category.index')->with('success', 'Category restored successfully.');
     }
 

@@ -6,8 +6,8 @@ import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import DataTableWrapper, { DataTableWrapperRef } from '@/components/datatables';
 import { BreadcrumbItem } from '@/types';
-import clsx from 'clsx';
 import { Category } from '@/types/category';
+import clsx from 'clsx';
 
 const columns = (filter: string) => [
     { data: 'id', title: 'ID' },
@@ -56,7 +56,6 @@ export default function CategoryIndex({ filter: initialFilter, success }: { filt
     };
 
     const drawCallback = () => {
-        // Render tombol Edit dengan React
         document.querySelectorAll('.inertia-link-cell').forEach((cell) => {
             const id = cell.getAttribute('data-id');
             if (id) {
@@ -68,39 +67,31 @@ export default function CategoryIndex({ filter: initialFilter, success }: { filt
                     >
                         Edit
                     </Link>
-
                 );
             }
         });
 
-        document.querySelectorAll('.btn-delete').forEach((button) => {
-            button.addEventListener('click', () => {
-                const id = button.getAttribute('data-id');
-                if (id) {
-                    handleDelete(parseInt(id, 10));
-                }
+        document.querySelectorAll('.btn-delete').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-id');
+                if (id) handleDelete(Number(id));
             });
         });
 
-        document.querySelectorAll('.btn-restore').forEach((button) => {
-            button.addEventListener('click', () => {
-                const id = button.getAttribute('data-id');
-                if (id) {
-                    handleRestore(parseInt(id, 10));
-                }
+        document.querySelectorAll('.btn-restore').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-id');
+                if (id) handleRestore(Number(id));
             });
         });
 
-        document.querySelectorAll('.btn-force-delete').forEach((button) => {
-            button.addEventListener('click', () => {
-                const id = button.getAttribute('data-id');
-                if (id) {
-                    handleForceDelete(parseInt(id, 10));
-                }
+        document.querySelectorAll('.btn-force-delete').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-id');
+                if (id) handleForceDelete(Number(id));
             });
         });
-    }
-
+    };
 
     const renderToggleTabs = () => {
         const tabs = ['active', 'trashed', 'all'];
@@ -130,19 +121,17 @@ export default function CategoryIndex({ filter: initialFilter, success }: { filt
             <div className="px-4 py-6">
                 <h1 className="text-2xl font-semibold mb-4">Category Management</h1>
                 <div className="col-md-12">
-                    <HeadingSmall title="category" description="Manage your category here." />
+                    <HeadingSmall title="Category" description="Manage your category here." />
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-xl font-semibold">Category List</h2>
                         <Link href={route('category.create')}>
                             <Button>Create Category</Button>
                         </Link>
                     </div>
-                    {/* Toggle Tabs */}
                     <div className="mb-4">{renderToggleTabs()}</div>
                     {success && (
                         <div className="p-2 mb-2 bg-green-100 text-green-800 rounded">{success}</div>
                     )}
-                    {/* Gunakan key berdasarkan filter agar DataTableWrapper re-mount ketika filter berubah */}
                     <DataTableWrapper
                         key={filter}
                         ref={dtRef}
