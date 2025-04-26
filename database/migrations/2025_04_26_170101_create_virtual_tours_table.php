@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('virtual_tours', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
             $table->string('name');
             $table->text('description')->nullable();
             $table->timestamps();
