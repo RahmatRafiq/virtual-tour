@@ -28,7 +28,7 @@ const mainNavItems: NavItem[] = [
                 title: 'Roles',
                 href: '/roles',
                 icon: Shield,
-            },  
+            },
             {
                 title: 'Permissions',
                 href: '/permissions',
@@ -40,6 +40,11 @@ const mainNavItems: NavItem[] = [
                 icon: Settings,
             },
         ],
+    },
+    {
+        title: 'Category',
+        href: '/category',
+        icon: Folder,
     },
 ];
 
