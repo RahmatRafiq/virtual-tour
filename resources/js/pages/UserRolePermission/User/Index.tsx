@@ -66,8 +66,8 @@ export default function UserIndex({ filter: initialFilter, success }: { filter: 
         root.render(
           <Link
             href={`/users/${id}/edit`}
-            className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-          >
+            className="inline-block ml-2 px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-center"
+            >
             Edit
           </Link>
         );

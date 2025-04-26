@@ -64,10 +64,11 @@ export default function CategoryIndex({ filter: initialFilter, success }: { filt
                 root.render(
                     <Link
                         href={route('category.edit', id)}
-                        className="btn-edit ml-2 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        className="inline-block ml-2 px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-center"
                     >
                         Edit
                     </Link>
+
                 );
             }
         });
