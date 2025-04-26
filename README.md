@@ -371,5 +371,3 @@ useEffect(() => {
 ## License
 
 This project is open-source and available under the MIT License.
-#   v i r t u a l - t o u r  
- 

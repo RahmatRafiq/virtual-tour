@@ -15,6 +15,11 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
+        title: 'Log Activity',
+        href: '/activity-logs',
+        icon: LayoutGrid,
+    },
+    {
         title: 'Users Management',
         href: '',
         icon: Users,
@@ -23,7 +28,7 @@ const mainNavItems: NavItem[] = [
                 title: 'Roles',
                 href: '/roles',
                 icon: Shield,
-            },  
+            },
             {
                 title: 'Permissions',
                 href: '/permissions',
@@ -35,6 +40,11 @@ const mainNavItems: NavItem[] = [
                 icon: Settings,
             },
         ],
+    },
+    {
+        title: 'Category',
+        href: '/category',
+        icon: Folder,
     },
 ];
 
