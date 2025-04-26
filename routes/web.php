@@ -37,6 +37,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-log.index');
 
+    Route::post('category/json', [\App\Http\Controllers\CategoryController::class, 'json'])->name('category.json');
+    Route::resource('category', \App\Http\Controllers\CategoryController::class);
+    Route::get('category/trashed', [\App\Http\Controllers\CategoryController::class, 'trashed'])->name('category.trashed');
+    Route::post('category/{category}/restore', [\App\Http\Controllers\CategoryController::class, 'restore'])->name('category.restore');
+    Route::delete('category/{category}/force-delete', [\App\Http\Controllers\CategoryController::class, 'forceDelete'])->name('category.force-delete');
+
     Route::post('logout', [SocialAuthController::class, 'logout'])->name('logout');
 
 });
