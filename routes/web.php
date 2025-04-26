@@ -9,11 +9,9 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-// Route for login with OAuth (Google, GitHub)
 Route::get('auth/{provider}', [SocialAuthController::class, 'redirectToProvider'])->name('auth.redirect');
 Route::get('auth/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback'])->name('auth.callback');
 
-// Middleware for pages that require authentication
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
@@ -37,18 +35,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('users/{user}/restore', [\App\Http\Controllers\UserRolePermission\UserController::class, 'restore'])->name('users.restore');
     Route::delete('users/{user}/force-delete', [\App\Http\Controllers\UserRolePermission\UserController::class, 'forceDelete'])->name('users.force-delete');
 
+    Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-log.index');
+
     Route::post('logout', [SocialAuthController::class, 'logout'])->name('logout');
 
 });
-Route::get('/dashboard/activity-logs', function () {
-    return Inertia::render('ActivityLogList');
-})->middleware(['auth']);
 
-Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-log.index');
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
-
-// "datatables.net": "^2.2.2",
-// "datatables.net-dt": "^2.2.2",
-// "datatables.net-react": "^1.0.0",
-// "jquery": "^3.7.1",
