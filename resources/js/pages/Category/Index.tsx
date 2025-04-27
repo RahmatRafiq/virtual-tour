@@ -62,7 +62,7 @@ export default function CategoryIndex({ filter: initialFilter, success }: { filt
                 const root = ReactDOM.createRoot(cell);
                 root.render(
                     <Link
-                        href={route('category.edit', id)}
+                        href={`/category/${id}/edit`}
                         className="inline-block ml-2 px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-center"
                     >
                         Edit
@@ -77,14 +77,12 @@ export default function CategoryIndex({ filter: initialFilter, success }: { filt
                 if (id) handleDelete(Number(id));
             });
         });
-
         document.querySelectorAll('.btn-restore').forEach((btn) => {
             btn.addEventListener('click', () => {
                 const id = btn.getAttribute('data-id');
                 if (id) handleRestore(Number(id));
             });
         });
-
         document.querySelectorAll('.btn-force-delete').forEach((btn) => {
             btn.addEventListener('click', () => {
                 const id = btn.getAttribute('data-id');

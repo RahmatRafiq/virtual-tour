@@ -25,22 +25,23 @@ class CategoryController extends Controller
 
     public function json(Request $request)
     {
-        $search = $request->search['value'];
-        $query  = Category::query();
+        $search = $request->input('search.value', '');
+        $filter = $request->input('filter', 'active');
 
-        $columns = [
-            'id',
-            'name',
-            'created_at',
-            'updated_at',
-        ];
+        $query = match ($filter) {
+            'trashed' => Category::onlyTrashed(),
+            'all' => Category::withTrashed(),
+            default => Category::query(),
+        };
 
-        if ($request->filled('search')) {
+        if ($search) {
             $query->where('name', 'like', "%{$search}%");
         }
 
+        $columns = ['id', 'name', 'created_at', 'updated_at'];
         if ($request->filled('order')) {
-            $query->orderBy($columns[$request->order[0]['column']], $request->order[0]['dir']);
+            $orderColumn = $columns[$request->order[0]['column']] ?? 'id';
+            $query->orderBy($orderColumn, $request->order[0]['dir']);
         }
 
         $data = DataTable::paginate($query, $request);
@@ -49,6 +50,7 @@ class CategoryController extends Controller
             return [
                 'id'         => $category->id,
                 'name'       => $category->name,
+                'trashed'    => $category->trashed(),
                 'created_at' => $category->created_at->toDateTimeString(),
                 'updated_at' => $category->updated_at->toDateTimeString(),
                 'actions'    => '',
