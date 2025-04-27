@@ -58,7 +58,6 @@ export default function UserIndex({ filter: initialFilter, success }: { filter: 
   };
 
   const drawCallback = () => {
-    // Render tombol Edit dengan React
     document.querySelectorAll('.inertia-link-cell').forEach((cell) => {
       const id = cell.getAttribute('data-id');
       if (id) {
@@ -67,14 +66,13 @@ export default function UserIndex({ filter: initialFilter, success }: { filter: 
           <Link
             href={`/users/${id}/edit`}
             className="inline-block ml-2 px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-center"
-            >
+          >
             Edit
           </Link>
         );
       }
     });
 
-    // Attach event listener untuk tombol Delete, Restore, dan Force Delete
     document.querySelectorAll('.btn-delete').forEach((btn) => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-id');
@@ -95,7 +93,6 @@ export default function UserIndex({ filter: initialFilter, success }: { filter: 
     });
   };
 
-  // Toggle tab menggunakan style mirip AppearanceToggleTab
   const renderToggleTabs = () => {
     const tabs = ['active', 'trashed', 'all'];
     return (
@@ -131,12 +128,10 @@ export default function UserIndex({ filter: initialFilter, success }: { filter: 
               <Button>Create User</Button>
             </Link>
           </div>
-          {/* Toggle Tabs */}
           <div className="mb-4">{renderToggleTabs()}</div>
           {success && (
             <div className="p-2 mb-2 bg-green-100 text-green-800 rounded">{success}</div>
           )}
-          {/* Gunakan key berdasarkan filter agar DataTableWrapper re-mount ketika filter berubah */}
           <DataTableWrapper
             key={filter}
             ref={dtRef}
