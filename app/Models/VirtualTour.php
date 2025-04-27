@@ -14,6 +14,7 @@ class VirtualTour extends Model
     protected $fillable = [
         'name',
         'description',
+        'category_id',
     ];
 
     protected $dates = ['deleted_at'];
