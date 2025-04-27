@@ -8,8 +8,8 @@ import { type PropsWithChildren } from 'react';
 
 const sidebarNavItems: NavItem[] = [
     {
-        title: 'Virtual Tours',
-        href: '/virtual-tours',
+        title: 'Virtual Tour',
+        href: '/virtual-tour',
         icon: null,
     },
     {
