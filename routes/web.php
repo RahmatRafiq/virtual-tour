@@ -54,6 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('sphere/trashed', [\App\Http\Controllers\SphereController::class, 'trashed'])->name('sphere.trashed');
     Route::post('sphere/{sphere}/restore', [\App\Http\Controllers\SphereController::class, 'restore'])->name('sphere.restore');
     Route::delete('sphere/{sphere}/force-delete', [\App\Http\Controllers\SphereController::class, 'forceDelete'])->name('sphere.force-delete');
+    Route::post('sphere/upload', [\App\Http\Controllers\SphereController::class, 'upload'])->name('sphere.upload');
 
     Route::post('logout', [SocialAuthController::class, 'logout'])->name('logout');
 
