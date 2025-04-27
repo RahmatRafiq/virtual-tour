@@ -124,37 +124,37 @@ export default function VirtualTourIndex({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Virtual Tours" />
-            <div className="px-4 py-6">
-                <h1 className="text-2xl font-semibold mb-4">Virtual Tour Management</h1>
-                <div className="col-md-12">
-                    <HeadingSmall
-                        title="Virtual Tours"
-                        description="Manage your virtual tours here."
-                    />
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-semibold">Tour List</h2>
-                        <Link href={route('virtual-tour.create')}>
-                            <Button>Create Tour</Button>
-                        </Link>
-                    </div>
-                    <div className="mb-4">{renderToggleTabs()}</div>
-                    {success && (
-                        <div className="p-2 mb-2 bg-green-100 text-green-800 rounded">
-                            {success}
+                <div className="px-4 py-6">
+                    <h1 className="text-2xl font-semibold mb-4">Virtual Tour Management</h1>
+                    <div className="col-md-12">
+                        <HeadingSmall
+                            title="Virtual Tours"
+                            description="Manage your virtual tours here."
+                        />
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-semibold">Tour List</h2>
+                            <Link href={route('virtual-tour.create')}>
+                                <Button>Create Tour</Button>
+                            </Link>
                         </div>
-                    )}
-                    <DataTableWrapper
-                        key={filter}
-                        ref={dtRef}
-                        ajax={{
-                            url: route('virtual-tour.json') + '?filter=' + filter,
-                            type: 'POST',
-                        }}
-                        columns={columns(filter)}
-                        options={{ drawCallback }}
-                    />
+                        <div className="mb-4">{renderToggleTabs()}</div>
+                        {success && (
+                            <div className="p-2 mb-2 bg-green-100 text-green-800 rounded">
+                                {success}
+                            </div>
+                        )}
+                        <DataTableWrapper
+                            key={filter}
+                            ref={dtRef}
+                            ajax={{
+                                url: route('virtual-tour.json') + '?filter=' + filter,
+                                type: 'POST',
+                            }}
+                            columns={columns(filter)}
+                            options={{ drawCallback }}
+                        />
+                    </div>
                 </div>
-            </div>
         </AppLayout>
     )
 }
