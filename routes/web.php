@@ -49,6 +49,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('virtual-tour/{virtualTour}/restore', [\App\Http\Controllers\VirtualTourController::class, 'restore'])->name('virtual-tour.restore');
     Route::delete('virtual-tour/{virtualTour}/force-delete', [\App\Http\Controllers\VirtualTourController::class, 'forceDelete'])->name('virtual-tour.force-delete');
 
+    Route::post('sphere/json', [\App\Http\Controllers\SphereController::class, 'json'])->name('sphere.json');
+    Route::resource('sphere', \App\Http\Controllers\SphereController::class);
+    Route::get('sphere/trashed', [\App\Http\Controllers\SphereController::class, 'trashed'])->name('sphere.trashed');
+    Route::post('sphere/{sphere}/restore', [\App\Http\Controllers\SphereController::class, 'restore'])->name('sphere.restore');
+    Route::delete('sphere/{sphere}/force-delete', [\App\Http\Controllers\SphereController::class, 'forceDelete'])->name('sphere.force-delete');
+
     Route::post('logout', [SocialAuthController::class, 'logout'])->name('logout');
 
 });
