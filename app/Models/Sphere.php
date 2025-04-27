@@ -32,10 +32,10 @@ class Sphere extends Model implements HasMedia
         return $this->hasMany(Hotspot::class);
     }
 
-    public function registerMediaCollections(): void
-    {
-        $this->addMediaCollection('sphere_image')->singleFile();
-    }
+    // public function registerMediaCollections(): void
+    // {
+    //     $this->addMediaCollection('sphere_image')->singleFile();
+    // }
 
     public function getPanoramaUrlAttribute(): ?string
     {
