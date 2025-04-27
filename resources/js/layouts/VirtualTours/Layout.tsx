@@ -14,7 +14,7 @@ const sidebarNavItems: NavItem[] = [
     },
     {
         title: 'Sphere',
-        href: '/virtual-tours/sphere',
+        href: '/sphere',
         icon: null,
     },
     {
