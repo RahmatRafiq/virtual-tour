@@ -43,6 +43,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('category/{category}/restore', [\App\Http\Controllers\CategoryController::class, 'restore'])->name('category.restore');
     Route::delete('category/{category}/force-delete', [\App\Http\Controllers\CategoryController::class, 'forceDelete'])->name('category.force-delete');
 
+    Route::post('virtual-tour/json', [\App\Http\Controllers\VirtualTourController::class, 'json'])->name('virtual-tour.json');
+    Route::resource('virtual-tour', \App\Http\Controllers\VirtualTourController::class);
+    Route::get('virtual-tour/trashed', [\App\Http\Controllers\VirtualTourController::class, 'trashed'])->name('virtual-tour.trashed');
+    Route::post('virtual-tour/{virtualTour}/restore', [\App\Http\Controllers\VirtualTourController::class, 'restore'])->name('virtual-tour.restore');
+    Route::delete('virtual-tour/{virtualTour}/force-delete', [\App\Http\Controllers\VirtualTourController::class, 'forceDelete'])->name('virtual-tour.force-delete');
+
     Route::post('logout', [SocialAuthController::class, 'logout'])->name('logout');
 
 });
