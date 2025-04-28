@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import AppLayout from '@/layouts/app-layout'
 import Dropzoner from '@/components/dropzoner'
+import VirtualTourLayout from '@/layouts/VirtualTours/Layout'
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Spheres', href: '/sphere' },
@@ -72,46 +73,43 @@ export default function SphereFormPage() {
     const imageRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        if (!fileRef.current) return
+        if (!fileRef.current) return;
         const dz = Dropzoner(fileRef.current, 'sphere_file', {
-            urlStore: route('sphere.upload'),
-            urlDestroy: route('sphere.upload'),
-            csrf,
-            acceptedFiles: '.obj,.gltf,.glb,.fbx,.jpg,.png,.another',
-            maxFiles: 1,
-            files: initialFiles.map(name => ({ file_name: name, size: 0, original_url: '' })),
-            kind: 'file',
-        })
-        dz.on('success', (_file, resp: { sphere_url: string }) => {
-            setData('sphere_file', [resp.sphere_url.split('/').pop()!])
-        })
-        dz.on('removedfile', () => {
-            setData('sphere_file', [])
-        })
-    }, [csrf])
+          urlStore: route('storage.destroy'),
+          urlDestroy: route('sphere.deleteFile'),
+          csrf,
+          acceptedFiles: '.obj,.gltf,.glb,.fbx,.img,.jpg,.jpeg,.png',
+          maxFiles: 1,
+          files: data.sphere_file.map(name => ({ file_name: name, size: 0, original_url: '' })),
+          kind: 'file',
+        });
+        dz.on('success', (_file, resp: { sphere_file_name: string; sphere_url: string }) => {
+          setData('sphere_file', [resp.sphere_file_name]);
+        });
+        dz.on('removedfile', () => setData('sphere_file', []));
+      }, [csrf]);
 
     useEffect(() => {
-        if (!imageRef.current) return
+        if (!imageRef.current) return;
         const dz2 = Dropzoner(imageRef.current, 'sphere_image', {
-            urlStore: route('sphere.upload'),
-            urlDestroy: route('sphere.upload'),
-            csrf,
-            acceptedFiles: 'image/*',
-            maxFiles: 1,
-            files: initialImages.map(name => ({ file_name: name, size: 0, original_url: '' })),
-            kind: 'image',
-        })
-        dz2.on('success', (_file, resp: { sphere_image_url: string }) => {
-            setData('sphere_image', [resp.sphere_image_url.split('/').pop()!])
-        })
-        dz2.on('removedfile', () => {
-            setData('sphere_image', [])
-        })
-    }, [csrf])
+          urlStore: route('storage.destroy'),
+          urlDestroy: route('sphere.deleteFile'),
+          csrf,
+          acceptedFiles: 'image/*',
+          maxFiles: 1,
+          files: data.sphere_image.map(name => ({ file_name: name, size: 0, original_url: '' })),
+          kind: 'image',
+        });
+        dz2.on('success', (_file, resp: { sphere_image_name: string; sphere_image_url: string }) => {
+          setData('sphere_image', [resp.sphere_image_name]);
+        });
+        dz2.on('removedfile', () => setData('sphere_image', []));
+      }, [csrf]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={isEdit ? 'Edit Sphere' : 'Create Sphere'} />
+          <VirtualTourLayout>
             <div className="px-4 py-6">
                 <HeadingSmall
                     title={isEdit ? 'Edit Sphere' : 'New Sphere'}
@@ -192,6 +190,7 @@ export default function SphereFormPage() {
                     </div>
                 </form>
             </div>
+            </VirtualTourLayout>
         </AppLayout>
     )
 }
