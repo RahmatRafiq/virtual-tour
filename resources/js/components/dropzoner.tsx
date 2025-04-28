@@ -19,6 +19,7 @@ interface DropzoneOptions {
   files?: FileData[];
   maxFiles: number;
   kind: string;
+  paramName: string;
 }
 
 const Dropzoner = (

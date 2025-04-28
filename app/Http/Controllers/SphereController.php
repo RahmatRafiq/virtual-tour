@@ -2,7 +2,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\DataTable;
-use App\Helpers\MediaLibrary;
 use App\Models\Sphere;
 use App\Models\VirtualTour;
 use DB;
@@ -68,8 +67,8 @@ class SphereController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'sphere_file.*'  => 'sometimes|required|image|max:5120|mimes:jpeg,jpg,png,webp',
-            'sphere_image.*' => 'sometimes|required|image|max:2048|mimes:jpeg,jpg,png,webp',
+            'sphere_file.*'  => 'sometimes|required|file|mimes:jpeg,jpg,png,webp,obj,glb|max:5120',
+            'sphere_image.*' => 'sometimes|required|file|mimes:jpeg,jpg,png,webp|max:2048',
             'sphere_id'      => 'nullable|exists:spheres,id',
         ]);
 
@@ -79,24 +78,18 @@ class SphereController extends Controller
 
         $response = [];
 
-        // handle file (.obj, .glb, dll)
+        // handle file (.obj, .glb, etc)
         if ($request->hasFile('sphere_file')) {
-            $file  = $request->file('sphere_file')[0];
-            $path  = Storage::disk('temp')->putFile('', $file);
-            $media = $model->addMediaFromDisk($path, 'temp')->toMediaCollection('sphere_file');
-            Storage::disk('temp')->delete($path);
-            $response['sphere_file_name'] = $media->file_name;
-            $response['sphere_url']       = $media->getFullUrl();
+            $file                      = $request->file('sphere_file')[0];
+            $path                      = Storage::disk('temp')->putFile('', $file);
+            $response['sphere_file'][] = basename($path);
         }
 
         // handle image (360° panorama)
         if ($request->hasFile('sphere_image')) {
-            $image = $request->file('sphere_image')[0];
-            $path  = Storage::disk('temp')->putFile('', $image);
-            $media = $model->addMediaFromDisk($path, 'temp')->toMediaCollection('sphere_image');
-            Storage::disk('temp')->delete($path);
-            $response['sphere_image_name'] = $media->file_name;
-            $response['sphere_image_url']  = $media->getFullUrl();
+            $image                      = $request->file('sphere_image')[0];
+            $path                       = Storage::disk('temp')->putFile('', $image);
+            $response['sphere_image'][] = basename($path);
         }
 
         return response()->json($response, 200);
@@ -105,9 +98,13 @@ class SphereController extends Controller
     public function deleteFile(Request $request)
     {
         $data = $request->validate(['filename' => 'required|string']);
+
+        // delete from temp
         if (Storage::disk('temp')->exists($data['filename'])) {
             Storage::disk('temp')->delete($data['filename']);
         }
+
+        // delete from media library
         $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::where('file_name', $data['filename'])->first();
         if ($media) {
             $media->delete();
@@ -121,8 +118,8 @@ class SphereController extends Controller
         return Inertia::render('Sphere/Form', [
             'virtualTours' => VirtualTour::all(),
             'sphere'       => null,
-            'sphere_file'  => null,
-            'sphere_image' => null,
+            'sphere_file'  => [],
+            'sphere_image' => [],
         ]);
     }
 
@@ -133,27 +130,36 @@ class SphereController extends Controller
             'name'            => 'required|string|max:255',
             'description'     => 'nullable|string',
             'initial_yaw'     => 'nullable|numeric',
+            'sphere_file'     => 'array',
+            'sphere_image'    => 'array',
         ]);
 
         DB::beginTransaction();
         try {
             $sphere = Sphere::create($validated);
 
-            if ($request->hasFile('sphere_file')) {
-                MediaLibrary::put(
-                    $sphere,
-                    'sphere_file',
-                    $request,
-                    'sphere_file'
-                );
+            // move from temp to media collection
+            if (! empty($validated['sphere_file'])) {
+                foreach ($validated['sphere_file'] as $filename) {
+                    $tempPath = Storage::disk('temp')->path($filename);
+                    if (file_exists($tempPath)) {
+                        $sphere->addMedia($tempPath)
+                            ->usingFileName($filename)
+                            ->toMediaCollection('sphere_file');
+                        Storage::disk('temp')->delete($filename);
+                    }
+                }
             }
-            if ($request->hasFile('sphere_image')) {
-                MediaLibrary::put(
-                    $sphere,
-                    'sphere_image',
-                    $request,
-                    'sphere_image'
-                );
+            if (! empty($validated['sphere_image'])) {
+                foreach ($validated['sphere_image'] as $filename) {
+                    $tempPath = Storage::disk('temp')->path($filename);
+                    if (file_exists($tempPath)) {
+                        $sphere->addMedia($tempPath)
+                            ->usingFileName($filename)
+                            ->toMediaCollection('sphere_image');
+                        Storage::disk('temp')->delete($filename);
+                    }
+                }
             }
 
             DB::commit();
@@ -161,7 +167,7 @@ class SphereController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             \Log::error('Store Sphere error: ' . $e->getMessage());
-            return back()->withErrors('error', 'Gagal membuat sphere.');
+            return back()->withErrors(['error' => 'Gagal membuat sphere.']);
         }
     }
 
@@ -174,8 +180,8 @@ class SphereController extends Controller
         return Inertia::render('Sphere/Form', [
             'virtualTours' => VirtualTour::all(),
             'sphere'       => $sphere,
-            'sphere_file'  => $sphereFile?->getFullUrl(),
-            'sphere_image' => $sphereImage?->getFullUrl(),
+            'sphere_file'  => $sphereFile?->file_name ? [$sphereFile->file_name] : [],
+            'sphere_image' => $sphereImage?->file_name ? [$sphereImage->file_name] : [],
         ]);
     }
 
@@ -187,9 +193,7 @@ class SphereController extends Controller
             'description'     => 'nullable|string',
             'initial_yaw'     => 'nullable|numeric',
             'sphere_file'     => 'array',
-            'sphere_file.*'   => 'string',
             'sphere_image'    => 'array',
-            'sphere_image.*'  => 'string',
         ]);
 
         DB::beginTransaction();
@@ -197,13 +201,32 @@ class SphereController extends Controller
             $sphere = Sphere::withTrashed()->findOrFail($id);
             $sphere->fill($validated)->save();
 
-            if ($request->hasFile('sphere_file')) {
+            // process sphere_file
+            if (array_key_exists('sphere_file', $validated)) {
+                // clear existing
                 $sphere->clearMediaCollection('sphere_file');
-                MediaLibrary::put($sphere, 'sphere_file', $request, 'sphere_file');
+                foreach ($validated['sphere_file'] as $filename) {
+                    $tempPath = Storage::disk('temp')->path($filename);
+                    if (file_exists($tempPath)) {
+                        $sphere->addMedia($tempPath)
+                            ->usingFileName($filename)
+                            ->toMediaCollection('sphere_file');
+                        Storage::disk('temp')->delete($filename);
+                    }
+                }
             }
-            if ($request->hasFile('sphere_image')) {
+            // process sphere_image
+            if (array_key_exists('sphere_image', $validated)) {
                 $sphere->clearMediaCollection('sphere_image');
-                MediaLibrary::put($sphere, 'sphere_image', $request, 'sphere_image');
+                foreach ($validated['sphere_image'] as $filename) {
+                    $tempPath = Storage::disk('temp')->path($filename);
+                    if (file_exists($tempPath)) {
+                        $sphere->addMedia($tempPath)
+                            ->usingFileName($filename)
+                            ->toMediaCollection('sphere_image');
+                        Storage::disk('temp')->delete($filename);
+                    }
+                }
             }
 
             DB::commit();
@@ -211,7 +234,7 @@ class SphereController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             \Log::error('Update Sphere error: ' . $e->getMessage());
-            return back()->withErrors('error', 'Gagal memperbarui sphere.');
+            return back()->withErrors(['error' => 'Gagal memperbarui sphere.']);
         }
     }
 

@@ -29,7 +29,15 @@ interface ProfileForm {
 }
 
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
-  const { auth, profileImage } = usePage<SharedData & { profileImage: { file_name: string; size: number; original_url?: string; url?: string } }>().props;
+  const { auth, profileImage } =
+    usePage<SharedData & {
+      profileImage: {
+        file_name: string;
+        size: number;
+        original_url?: string;
+        url?: string;
+      };
+    }>().props;
 
   const initialImages: string[] = profileImage ? [profileImage.file_name] : [];
 
@@ -43,7 +51,8 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
     ]
     : [];
 
-  const { data, setData, patch, errors, processing, recentlySuccessful } = useForm<ProfileForm>({
+  const { data, setData, patch, errors, processing, recentlySuccessful } = 
+  useForm<ProfileForm>({
     name: auth.user.name,
     email: auth.user.email,
     'profile-images': initialImages,
@@ -72,6 +81,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
         maxFiles: 3,
         files: initialFiles,
         kind: 'image',
+      paramName: 'profile-images',
       });
 
       dzInstance.current.on('success', function (file, response: { name: string; url?: string }) {

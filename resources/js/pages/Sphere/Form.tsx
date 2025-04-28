@@ -1,113 +1,152 @@
-import { useEffect, useRef } from 'react'
-import { type BreadcrumbItem, type SharedData } from '@/types'
-import { Transition } from '@headlessui/react'
-import { Head, useForm, usePage } from '@inertiajs/react'
-import { FormEventHandler } from 'react'
+import { useEffect, useRef } from 'react';
+import { type BreadcrumbItem, type SharedData } from '@/types';
+import { Transition } from '@headlessui/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
+import { FormEventHandler } from 'react';
 
-import HeadingSmall from '@/components/heading-small'
-import InputError from '@/components/input-error'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import AppLayout from '@/layouts/app-layout'
-import Dropzoner from '@/components/dropzoner'
-import VirtualTourLayout from '@/layouts/VirtualTours/Layout'
-import CustomSelect from '@/components/select'
+import HeadingSmall from '@/components/heading-small';
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import AppLayout from '@/layouts/app-layout';
+import VirtualTourLayout from '@/layouts/VirtualTours/Layout';
+import CustomSelect from '@/components/select';
+import Dropzoner from '@/components/dropzoner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Spheres', href: '/sphere' },
-]
+];
 
 interface SphereForm {
-    virtual_tour_id: number
-    name: string
-    description: string
-    initial_yaw: number
-    'sphere_file': string[]
-    'sphere_image': string[]
-    [key: string]: number | string | string[]
+    virtual_tour_id: number;
+    name: string;
+    description: string;
+    initial_yaw: number;
+    sphere_file: string[];
+    sphere_image: string[];
+    [key: string]: number | string | string[];
 }
 
 export default function SphereFormPage() {
-    const { sphere, virtualTours, sphere_file, sphere_image } =
-        usePage<SharedData & {
-            sphere: {
-                id: number
-                virtual_tour_id: number
-                name: string
-                description?: string
-                initial_yaw?: number
-                trashed: boolean
-            } | null
-            virtualTours: { id: number; name: string }[]
-            sphere_file: string | null
-            sphere_image: string | null
-        }>().props
+    const { sphere, virtualTours } = usePage<
+        SharedData & {
+            sphere?: {
+                id: number;
+                virtual_tour_id: number;
+                name: string;
+                description?: string;
+                initial_yaw?: number;
+                trashed: boolean;
+                sphere_file: string | null;
+                sphere_image: string | null;
+            };
+            virtualTours: { id: number; name: string }[];
+        }
+    >().props;
 
-    const isEdit = sphere !== null
+    const isEdit = !!sphere;
 
-    const initialFiles = sphere_file ? [sphere_file] : []
-    const initialImages = sphere_image ? [sphere_image] : []
+    // Inisialisasi data form
+    const initialSphereFile = sphere?.sphere_file ? [sphere.sphere_file] : [];
+    const initialSphereImage = sphere?.sphere_image ? [sphere.sphere_image] : [];
 
     const { data, setData, post, put, processing, errors, recentlySuccessful } =
         useForm<SphereForm>({
-            virtual_tour_id: sphere?.virtual_tour_id || virtualTours[0]?.id,
+            virtual_tour_id: sphere?.virtual_tour_id || virtualTours[0]?.id || 0,
             name: sphere?.name || '',
             description: sphere?.description || '',
             initial_yaw: sphere?.initial_yaw || 0,
-            sphere_file: initialFiles,
-            sphere_image: initialImages,
-        })
+            sphere_file: initialSphereFile,
+            sphere_image: initialSphereImage,
+        });
 
-    const submit: FormEventHandler = e => {
-        e.preventDefault()
+    const submit: FormEventHandler = (e) => {
+        e.preventDefault();
         if (isEdit) {
-            put(route('sphere.update', sphere!.id), { preserveScroll: true })
+            put(route('sphere.update', sphere!.id), { preserveScroll: true });
         } else {
-            post(route('sphere.store'), { preserveScroll: true })
+            post(route('sphere.store'), { preserveScroll: true });
         }
-    }
+    };
 
-    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-    const fileRef = useRef<HTMLDivElement>(null)
-    const imageRef = useRef<HTMLDivElement>(null)
+    // Ref untuk dropzone
+    const fileRef = useRef<HTMLDivElement>(null);
+    const imageRef = useRef<HTMLDivElement>(null);
 
+    // Setup dropzone untuk file 3D
     useEffect(() => {
-        if (!fileRef.current) return;
-        const dz = Dropzoner(fileRef.current, 'sphere_file', {
-            urlStore: route('storage.destroy'),
-            urlDestroy: route('sphere.deleteFile'),
-            csrf,
-            acceptedFiles: '.obj,.gltf,.glb,.fbx,.jpg,.jpeg,.png',
-            maxFiles: 1,
-            files: data.sphere_file.map(name => ({ file_name: name, size: 0, original_url: '' })),
-            kind: 'file',
-        });
-        dz.on('success', (_file, resp: { sphere_file_name: string; sphere_url: string }) => {
-            setData('sphere_file', [resp.sphere_file_name]);
-        });
-        dz.on('removedfile', () => setData('sphere_file', []));
-    }, [csrf]);
+        if (fileRef.current) {
+            const initialFiles = sphere?.sphere_file
+                ? [{
+                    file_name: sphere.sphere_file,
+                    size: 0,
+                    original_url: route('storage.url', { filename: sphere.sphere_file })
+                }]
+                : [];
 
+            const dz = Dropzoner(fileRef.current, 'sphere_file', {
+                urlStore: route('storage.store'),
+                urlDestroy: route('sphere.deleteFile'),
+                csrf,
+                acceptedFiles: 'image/*',
+                maxFiles: 1,
+                files: initialFiles,
+                kind: 'file',
+                paramName: 'sphere_file'
+            });
 
+            dz.on('success', (file, response: { name: string }) => {
+                setData('sphere_file', [response.name]);
+            });
+
+            dz.on('removedfile', () => {
+                setData('sphere_file', []);
+            });
+
+            return () => {
+                dz.destroy();
+            };
+        }
+    }, [csrf, sphere?.sphere_file]);
+
+    // Setup dropzone untuk gambar 360
     useEffect(() => {
-        if (!imageRef.current) return;
-        const dz2 = Dropzoner(imageRef.current, 'sphere_image', {
-            urlStore: route('storage.destroy'),
-            urlDestroy: route('sphere.deleteFile'),
-            csrf,
-            acceptedFiles: 'image/*',
-            maxFiles: 1,
-            files: data.sphere_image.map(name => ({ file_name: name, size: 0, original_url: '' })),
-            kind: 'image',
-        });
-        dz2.on('success', (_file, resp: { sphere_image_name: string; sphere_image_url: string }) => {
-            setData('sphere_image', [resp.sphere_image_name]);
-        });
-        dz2.on('removedfile', () => setData('sphere_image', []));
-    }, [csrf]);
+        if (imageRef.current) {
+            const initialImages = sphere?.sphere_image
+                ? [{
+                    file_name: sphere.sphere_image,
+                    size: 0,
+                    original_url: route('storage.url', { filename: sphere.sphere_image })
+                }]
+                : [];
 
+            const dz = Dropzoner(imageRef.current, 'sphere_image', {
+                urlStore: route('storage.store'),
+                urlDestroy: route('sphere.deleteFile'),
+                csrf,
+                acceptedFiles: 'image/*',
+                maxFiles: 1,
+                files: initialImages,
+                kind: 'image',
+                paramName: 'sphere_image'
+            });
+
+            dz.on('success', (file, response: { name: string }) => {
+                setData('sphere_image', [response.name]);
+            });
+
+            dz.on('removedfile', () => {
+                setData('sphere_image', []);
+            });
+
+            return () => {
+                dz.destroy();
+            };
+        }
+    }, [csrf, sphere?.sphere_image]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -120,19 +159,22 @@ export default function SphereFormPage() {
                     />
 
                     <form onSubmit={submit} className="space-y-6">
-                        <Label htmlFor="virtual_tour_id">Virtual Tour</Label>
-                        <CustomSelect
-                            id="virtual_tour_id"
-                            isMulti={false}
-                            options={virtualTours.map((tour) => ({ value: tour.id, label: tour.name }))}
-                            value={virtualTours
-                                .map((tour) => ({ value: tour.id, label: tour.name }))
-                                .find((option) => option.value === data.virtual_tour_id) || null}
-                            onChange={(selected) => {
-                                setData('virtual_tour_id', (selected as { value: number })?.value ?? null);
-                            }}
-                        />
-                        <InputError message={errors.virtual_tour_id} />
+                        <div className="grid gap-2">
+                            <Label htmlFor="virtual_tour_id">Virtual Tour</Label>
+                            <CustomSelect
+                                id="virtual_tour_id"
+                                isMulti={false}
+                                options={virtualTours.map((tour) => ({ value: tour.id, label: tour.name }))}
+                                value={virtualTours
+                                    .map((tour) => ({ value: tour.id, label: tour.name }))
+                                    .find((option) => option.value === data.virtual_tour_id) || null}
+                                onChange={(selected) => {
+                                    setData('virtual_tour_id', (selected as { value: number })?.value ?? 0);
+                                }}
+                            />
+                            <InputError message={errors.virtual_tour_id as string} />
+                        </div>
+
                         <div className="grid gap-2">
                             <Label htmlFor="name">Sphere Name</Label>
                             <Input
@@ -140,7 +182,7 @@ export default function SphereFormPage() {
                                 value={data.name}
                                 onChange={e => setData('name', e.target.value)}
                             />
-                            <InputError message={errors.name} />
+                            <InputError message={errors.name as string} />
                         </div>
 
                         <div className="grid gap-2">
@@ -149,9 +191,9 @@ export default function SphereFormPage() {
                                 id="description"
                                 value={data.description}
                                 onChange={e => setData('description', e.target.value)}
-                                className="border rounded p-2 w-full"
+                                className="border rounded p-2 w-full h-24"
                             />
-                            <InputError message={errors.description} />
+                            <InputError message={errors.description as string} />
                         </div>
 
                         <div className="grid gap-2">
@@ -159,26 +201,37 @@ export default function SphereFormPage() {
                             <Input
                                 id="initial_yaw"
                                 type="number"
+                                min="0"
+                                max="360"
+                                step="0.1"
                                 value={data.initial_yaw}
-                                onChange={e => setData('initial_yaw', parseFloat(e.target.value))}
+                                onChange={e => setData('initial_yaw', Number(e.target.value))}
                             />
-                            <InputError message={errors.initial_yaw} />
+                            <InputError message={errors.initial_yaw as string} />
                         </div>
 
                         <div className="grid gap-2">
-                            <Label>3D File (OBJ/GLTF/...)</Label>
-                            <div ref={fileRef} className="dropzone border-dashed border-2 rounded p-4" />
-                            <InputError message={errors['sphere_file'] as string} />
+                            <Label>3D File (Format: OBJ, GLTF, GLB, FBX)</Label>
+                            <div
+                                ref={fileRef}
+                                className="dropzone border-dashed border-2 rounded p-4 dark:text-black"
+                            />
+                            <InputError message={errors.sphere_file as string} />
                         </div>
 
                         <div className="grid gap-2">
                             <Label>360° Panorama Image</Label>
-                            <div ref={imageRef} className="dropzone border-dashed border-2 rounded p-4" />
-                            <InputError message={errors['sphere_image'] as string} />
+                            <div
+                                ref={imageRef}
+                                className="dropzone border-dashed border-2 rounded p-4 dark:text-black"
+                            />
+                            <InputError message={errors.sphere_image as string} />
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <Button disabled={processing}>{isEdit ? 'Update' : 'Create'}</Button>
+                            <Button disabled={processing}>
+                                {isEdit ? 'Update Sphere' : 'Create Sphere'}
+                            </Button>
                             <Transition
                                 show={recentlySuccessful}
                                 enter="transition ease-in-out"
@@ -193,5 +246,5 @@ export default function SphereFormPage() {
                 </div>
             </VirtualTourLayout>
         </AppLayout>
-    )
+    );
 }
