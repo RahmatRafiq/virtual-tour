@@ -74,6 +74,20 @@ return [
             'visibility' => 'public',
         ],
 
+        'sphere_file' => [
+            'driver'     => 'local',
+            'root'       => storage_path('app/public/sphere_file'),
+            'url'        => env('APP_URL').'/storage/sphere_file',
+            'visibility' => 'public',
+        ],
+    
+        'sphere_image' => [
+            'driver'     => 'local',
+            'root'       => storage_path('app/public/sphere_image'),
+            'url'        => env('APP_URL').'/storage/sphere_image',
+            'visibility' => 'public',
+        ],
+
     ],
 
     /*

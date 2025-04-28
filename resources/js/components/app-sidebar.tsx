@@ -46,6 +46,11 @@ const mainNavItems: NavItem[] = [
         href: '/category',
         icon: Folder,
     },
+    {
+        title: 'Virtual Tour',
+        href: '/virtual-tour',
+        icon: BookOpen, 
+    },
 ];
 
 const footerNavItems: NavItem[] = [

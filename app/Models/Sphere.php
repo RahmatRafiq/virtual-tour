@@ -5,12 +5,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Sphere extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, SoftDeletes;
 
     protected $fillable = [
         'virtual_tour_id',
@@ -18,6 +19,8 @@ class Sphere extends Model implements HasMedia
         'description',
         'initial_yaw',
     ];
+
+    protected $dates = ['deleted_at'];
 
     public function virtualTour(): BelongsTo
     {
@@ -31,7 +34,13 @@ class Sphere extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('sphere_image')->singleFile();
+        $this
+            ->addMediaCollection('sphere_file')
+            ->useDisk('sphere_file');
+
+        $this
+            ->addMediaCollection('sphere_image')
+            ->useDisk('sphere_image');
     }
 
     public function getPanoramaUrlAttribute(): ?string
