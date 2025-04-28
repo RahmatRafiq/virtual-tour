@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import AppLayout from '@/layouts/app-layout'
 import Dropzoner from '@/components/dropzoner'
 import VirtualTourLayout from '@/layouts/VirtualTours/Layout'
+import CustomSelect from '@/components/select'
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Spheres', href: '/sphere' },
@@ -75,7 +76,7 @@ export default function SphereFormPage() {
     useEffect(() => {
         if (!fileRef.current) return;
         const dz = Dropzoner(fileRef.current, 'sphere_file', {
-            urlStore: route('storage.destroy'),        // ← perbaikan di sini
+            urlStore: route('storage.destroy'),
             urlDestroy: route('sphere.deleteFile'),
             csrf,
             acceptedFiles: '.obj,.gltf,.glb,.fbx,.jpg,.jpeg,.png',
@@ -93,7 +94,7 @@ export default function SphereFormPage() {
     useEffect(() => {
         if (!imageRef.current) return;
         const dz2 = Dropzoner(imageRef.current, 'sphere_image', {
-            urlStore: route('storage.destroy'),       
+            urlStore: route('storage.destroy'),
             urlDestroy: route('sphere.deleteFile'),
             csrf,
             acceptedFiles: 'image/*',
@@ -119,21 +120,19 @@ export default function SphereFormPage() {
                     />
 
                     <form onSubmit={submit} className="space-y-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="virtual_tour_id">Virtual Tour</Label>
-                            <select
-                                id="virtual_tour_id"
-                                value={data.virtual_tour_id}
-                                onChange={e => setData('virtual_tour_id', Number(e.target.value))}
-                                className="border rounded p-2"
-                            >
-                                {virtualTours.map(t => (
-                                    <option key={t.id} value={t.id}>{t.name}</option>
-                                ))}
-                            </select>
-                            <InputError message={errors.virtual_tour_id} />
-                        </div>
-
+                        <Label htmlFor="virtual_tour_id">Virtual Tour</Label>
+                        <CustomSelect
+                            id="virtual_tour_id"
+                            isMulti={false}
+                            options={virtualTours.map((tour) => ({ value: tour.id, label: tour.name }))}
+                            value={virtualTours
+                                .map((tour) => ({ value: tour.id, label: tour.name }))
+                                .find((option) => option.value === data.virtual_tour_id) || null}
+                            onChange={(selected) => {
+                                setData('virtual_tour_id', (selected as { value: number })?.value ?? null);
+                            }}
+                        />
+                        <InputError message={errors.virtual_tour_id} />
                         <div className="grid gap-2">
                             <Label htmlFor="name">Sphere Name</Label>
                             <Input
