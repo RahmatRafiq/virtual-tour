@@ -75,121 +75,123 @@ export default function SphereFormPage() {
     useEffect(() => {
         if (!fileRef.current) return;
         const dz = Dropzoner(fileRef.current, 'sphere_file', {
-          urlStore: route('storage.destroy'),
-          urlDestroy: route('sphere.deleteFile'),
-          csrf,
-          acceptedFiles: '.obj,.gltf,.glb,.fbx,.img,.jpg,.jpeg,.png',
-          maxFiles: 1,
-          files: data.sphere_file.map(name => ({ file_name: name, size: 0, original_url: '' })),
-          kind: 'file',
+            urlStore: route('storage.destroy'),        // ← perbaikan di sini
+            urlDestroy: route('sphere.deleteFile'),
+            csrf,
+            acceptedFiles: '.obj,.gltf,.glb,.fbx,.jpg,.jpeg,.png',
+            maxFiles: 1,
+            files: data.sphere_file.map(name => ({ file_name: name, size: 0, original_url: '' })),
+            kind: 'file',
         });
         dz.on('success', (_file, resp: { sphere_file_name: string; sphere_url: string }) => {
-          setData('sphere_file', [resp.sphere_file_name]);
+            setData('sphere_file', [resp.sphere_file_name]);
         });
         dz.on('removedfile', () => setData('sphere_file', []));
-      }, [csrf]);
+    }, [csrf]);
+
 
     useEffect(() => {
         if (!imageRef.current) return;
         const dz2 = Dropzoner(imageRef.current, 'sphere_image', {
-          urlStore: route('storage.destroy'),
-          urlDestroy: route('sphere.deleteFile'),
-          csrf,
-          acceptedFiles: 'image/*',
-          maxFiles: 1,
-          files: data.sphere_image.map(name => ({ file_name: name, size: 0, original_url: '' })),
-          kind: 'image',
+            urlStore: route('storage.destroy'),       
+            urlDestroy: route('sphere.deleteFile'),
+            csrf,
+            acceptedFiles: 'image/*',
+            maxFiles: 1,
+            files: data.sphere_image.map(name => ({ file_name: name, size: 0, original_url: '' })),
+            kind: 'image',
         });
         dz2.on('success', (_file, resp: { sphere_image_name: string; sphere_image_url: string }) => {
-          setData('sphere_image', [resp.sphere_image_name]);
+            setData('sphere_image', [resp.sphere_image_name]);
         });
         dz2.on('removedfile', () => setData('sphere_image', []));
-      }, [csrf]);
+    }, [csrf]);
+
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={isEdit ? 'Edit Sphere' : 'Create Sphere'} />
-          <VirtualTourLayout>
-            <div className="px-4 py-6">
-                <HeadingSmall
-                    title={isEdit ? 'Edit Sphere' : 'New Sphere'}
-                    description="Upload 3D file & 360° panorama"
-                />
+            <VirtualTourLayout>
+                <div className="px-4 py-6">
+                    <HeadingSmall
+                        title={isEdit ? 'Edit Sphere' : 'New Sphere'}
+                        description="Upload 3D file & 360° panorama"
+                    />
 
-                <form onSubmit={submit} className="space-y-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="virtual_tour_id">Virtual Tour</Label>
-                        <select
-                            id="virtual_tour_id"
-                            value={data.virtual_tour_id}
-                            onChange={e => setData('virtual_tour_id', Number(e.target.value))}
-                            className="border rounded p-2"
-                        >
-                            {virtualTours.map(t => (
-                                <option key={t.id} value={t.id}>{t.name}</option>
-                            ))}
-                        </select>
-                        <InputError message={errors.virtual_tour_id} />
-                    </div>
+                    <form onSubmit={submit} className="space-y-6">
+                        <div className="grid gap-2">
+                            <Label htmlFor="virtual_tour_id">Virtual Tour</Label>
+                            <select
+                                id="virtual_tour_id"
+                                value={data.virtual_tour_id}
+                                onChange={e => setData('virtual_tour_id', Number(e.target.value))}
+                                className="border rounded p-2"
+                            >
+                                {virtualTours.map(t => (
+                                    <option key={t.id} value={t.id}>{t.name}</option>
+                                ))}
+                            </select>
+                            <InputError message={errors.virtual_tour_id} />
+                        </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="name">Sphere Name</Label>
-                        <Input
-                            id="name"
-                            value={data.name}
-                            onChange={e => setData('name', e.target.value)}
-                        />
-                        <InputError message={errors.name} />
-                    </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="name">Sphere Name</Label>
+                            <Input
+                                id="name"
+                                value={data.name}
+                                onChange={e => setData('name', e.target.value)}
+                            />
+                            <InputError message={errors.name} />
+                        </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="description">Description</Label>
-                        <textarea
-                            id="description"
-                            value={data.description}
-                            onChange={e => setData('description', e.target.value)}
-                            className="border rounded p-2 w-full"
-                        />
-                        <InputError message={errors.description} />
-                    </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="description">Description</Label>
+                            <textarea
+                                id="description"
+                                value={data.description}
+                                onChange={e => setData('description', e.target.value)}
+                                className="border rounded p-2 w-full"
+                            />
+                            <InputError message={errors.description} />
+                        </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="initial_yaw">Initial Yaw (°)</Label>
-                        <Input
-                            id="initial_yaw"
-                            type="number"
-                            value={data.initial_yaw}
-                            onChange={e => setData('initial_yaw', parseFloat(e.target.value))}
-                        />
-                        <InputError message={errors.initial_yaw} />
-                    </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="initial_yaw">Initial Yaw (°)</Label>
+                            <Input
+                                id="initial_yaw"
+                                type="number"
+                                value={data.initial_yaw}
+                                onChange={e => setData('initial_yaw', parseFloat(e.target.value))}
+                            />
+                            <InputError message={errors.initial_yaw} />
+                        </div>
 
-                    <div className="grid gap-2">
-                        <Label>3D File (OBJ/GLTF/...)</Label>
-                        <div ref={fileRef} className="dropzone border-dashed border-2 rounded p-4" />
-                        <InputError message={errors['sphere_file'] as string} />
-                    </div>
+                        <div className="grid gap-2">
+                            <Label>3D File (OBJ/GLTF/...)</Label>
+                            <div ref={fileRef} className="dropzone border-dashed border-2 rounded p-4" />
+                            <InputError message={errors['sphere_file'] as string} />
+                        </div>
 
-                    <div className="grid gap-2">
-                        <Label>360° Panorama Image</Label>
-                        <div ref={imageRef} className="dropzone border-dashed border-2 rounded p-4" />
-                        <InputError message={errors['sphere_image'] as string} />
-                    </div>
+                        <div className="grid gap-2">
+                            <Label>360° Panorama Image</Label>
+                            <div ref={imageRef} className="dropzone border-dashed border-2 rounded p-4" />
+                            <InputError message={errors['sphere_image'] as string} />
+                        </div>
 
-                    <div className="flex items-center gap-4">
-                        <Button disabled={processing}>{isEdit ? 'Update' : 'Create'}</Button>
-                        <Transition
-                            show={recentlySuccessful}
-                            enter="transition ease-in-out"
-                            enterFrom="opacity-0"
-                            leave="transition ease-in-out"
-                            leaveTo="opacity-0"
-                        >
-                            <span className="text-sm text-green-600">Saved.</span>
-                        </Transition>
-                    </div>
-                </form>
-            </div>
+                        <div className="flex items-center gap-4">
+                            <Button disabled={processing}>{isEdit ? 'Update' : 'Create'}</Button>
+                            <Transition
+                                show={recentlySuccessful}
+                                enter="transition ease-in-out"
+                                enterFrom="opacity-0"
+                                leave="transition ease-in-out"
+                                leaveTo="opacity-0"
+                            >
+                                <span className="text-sm text-green-600">Saved.</span>
+                            </Transition>
+                        </div>
+                    </form>
+                </div>
             </VirtualTourLayout>
         </AppLayout>
     )
