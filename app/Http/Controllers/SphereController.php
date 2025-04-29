@@ -107,16 +107,15 @@ class SphereController extends Controller
 
     public function edit($id)
     {
-        $sphere = Sphere::withTrashed()->with(['media'])->findOrFail($id);
-
-        $sphere->media = [
-            'sphere_file'  => $sphere->getFirstMediaUrl('sphere_file'),
-            'sphere_image' => $sphere->getFirstMediaUrl('sphere_image'),
-        ];
-        // dd($sphere);
+        $sphere      = Sphere::withTrashed()->with(['media'])->findOrFail($id);
+        $sphereImage = $sphere->getMedia('sphere_image')->first();
+        $sphereFile  = $sphere->getMedia('sphere_file')->first();
+        
         return Inertia::render('Sphere/Form', [
             'virtualTours' => VirtualTour::all(),
             'sphere'       => $sphere,
+            'sphereImage'  => $sphereImage,
+            'sphereFile'   => $sphereFile,
         ]);
     }
 

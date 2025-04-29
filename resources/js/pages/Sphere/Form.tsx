@@ -40,6 +40,7 @@ export default function SphereFormPage() {
                 trashed: boolean;
                 sphere_file: string | null;
                 sphere_image: string | null;
+                media?: { collection_name: string; original_url: string }[];
             };
             virtualTours: { id: number; name: string }[];
         }
@@ -47,9 +48,9 @@ export default function SphereFormPage() {
 
     const isEdit = !!sphere;
 
-    // Inisialisasi data form
-    const initialSphereFile = sphere?.sphere_file ? [sphere.sphere_file] : [];
-    const initialSphereImage = sphere?.sphere_image ? [sphere.sphere_image] : [];
+    const initialSphereFile = sphere?.media?.filter(m => m.collection_name === 'sphere_file').map(m => m.original_url) || [];
+    const initialSphereImage = sphere?.media?.filter(m => m.collection_name === 'sphere_image').map(m => m.original_url) || [];
+
 
     const { data, setData, post, put, processing, errors, recentlySuccessful } =
         useForm<SphereForm>({
@@ -60,7 +61,7 @@ export default function SphereFormPage() {
             sphere_file: initialSphereFile,
             sphere_image: initialSphereImage,
         });
-
+    console.log('Sphere:', sphere);
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         if (isEdit) {
@@ -72,23 +73,23 @@ export default function SphereFormPage() {
 
     const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-    // Ref untuk dropzone
     const fileRef = useRef<HTMLDivElement>(null);
     const imageRef = useRef<HTMLDivElement>(null);
 
-    // Setup dropzone untuk file 3D
     useEffect(() => {
         if (fileRef.current) {
-            const initialFiles = sphere?.sphere_file
-                ? [{
-                    file_name: sphere.sphere_file,
+            const initialFiles = sphere?.media
+                ?.filter(m => m.collection_name === 'sphere_file')
+                .map(m => ({
+                    original_url: m.original_url,
+                    file_name: m.original_url.split('/').pop() || 'unknown',
                     size: 0,
-                    original_url: route('storage.url', { filename: sphere.sphere_file })
-                }]
-                : [];
+                })) || [];
+
+            console.log('Initial Files:', initialFiles);
 
             const dz = Dropzoner(fileRef.current, 'sphere_file', {
-                urlStore: route('storage.store'),
+                urlStore: route('storage.destroy'),
                 urlDestroy: route('sphere.deleteFile'),
                 csrf,
                 acceptedFiles: 'image/*',
@@ -114,16 +115,16 @@ export default function SphereFormPage() {
 
     useEffect(() => {
         if (imageRef.current) {
-            const initialImages = sphere?.sphere_image
-                ? [{
-                    file_name: sphere.sphere_image,
+            const initialImages = sphere?.media
+                ?.filter(m => m.collection_name === 'sphere_image')
+                .map(m => ({
+                    original_url: m.original_url,
+                    file_name: m.original_url.split('/').pop() || 'unknown',
                     size: 0,
-                    original_url: route('storage.url', { filename: sphere.sphere_image })
-                }]
-                : [];
+                })) || [];
 
             const dz = Dropzoner(imageRef.current, 'sphere_image', {
-                urlStore: route('storage.store'),
+                urlStore: route('storage.destroy'),
                 urlDestroy: route('sphere.deleteFile'),
                 csrf,
                 acceptedFiles: 'image/*',
