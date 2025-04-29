@@ -95,19 +95,19 @@ export default function SphereIndex({ filter: initialFilter, success }: { filter
         })
     }
 
-    const renderTabs = () => {
+    const renderToggleTabs = () => {
         const tabs = ['active', 'trashed', 'all']
         return (
-            <div className="inline-flex gap-1 rounded-lg bg-neutral-100 p-1">
-                {tabs.map(tab => (
+            <div className="inline-flex gap-1 rounded-lg bg-neutral-100 p-1 dark:bg-neutral-800">
+                {tabs.map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setFilter(tab)}
                         className={clsx(
-                            'px-3 py-1 rounded-md transition',
+                            'flex items-center rounded-md px-3.5 py-1.5 transition-colors',
                             filter === tab
-                                ? 'bg-white shadow dark:bg-neutral-700'
-                                : 'text-neutral-500 hover:bg-neutral-200'
+                                ? 'bg-white shadow-xs dark:bg-neutral-700 dark:text-neutral-100'
+                                : 'text-neutral-500 hover:bg-neutral-200/60 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-700/60'
                         )}
                     >
                         {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -125,13 +125,13 @@ export default function SphereIndex({ filter: initialFilter, success }: { filter
                     <h1 className="text-2xl font-semibold mb-4">Sphere Management</h1>
                     <HeadingSmall title="Spheres" description="Manage all spheres here." />
 
-                    <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-xl font-semibold">Sphere List</h2>
                         <Link href={route('sphere.create')}>
                             <Button>Create Sphere</Button>
                         </Link>
-                        {renderTabs()}
                     </div>
-
+                    <div className="mb-4">{renderToggleTabs()}</div>
                     {success && (
                         <div className="mb-4 p-2 bg-green-100 text-green-800 rounded">
                             {success}
@@ -147,10 +147,7 @@ export default function SphereIndex({ filter: initialFilter, success }: { filter
                                 type: 'POST',
                             }}
                             columns={columns(filter)}
-                            options={{
-                                drawCallback,
-
-                            }}
+                            options={{drawCallback,}}
                         />
                     </div>
                 </div>
