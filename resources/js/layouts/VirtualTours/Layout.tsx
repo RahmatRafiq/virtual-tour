@@ -57,9 +57,10 @@ export default function VirtualTourLayout({ children }: PropsWithChildren) {
 
                 <Separator className="my-6 md:hidden" />
 
-                <div className="flex-1 md:max-w-2xl">
-                    <section className="max-w-xl space-y-12">{children}</section>
+                <div className="flex-1 overflow-x-auto">
+                    <section className="min-w-full space-y-12">{children}</section>
                 </div>
+
             </div>
         </div>
     );

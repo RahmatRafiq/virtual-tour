@@ -10,6 +10,7 @@ import DataTableWrapper, { DataTableWrapperRef } from '@/components/datatables'
 import { BreadcrumbItem } from '@/types'
 import clsx from 'clsx'
 import { VirtualTour } from '@/types/virtualTour'
+import VirtualTourLayout from '@/layouts/VirtualTours/Layout'
 
 const columns = (filter: string) => [
     { data: 'id', title: 'ID' },
@@ -79,19 +80,19 @@ export default function VirtualTourIndex({
                 )
             }
         })
-        document.querySelectorAll('.btn-delete').forEach((btn) => {
+        document.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.getAttribute('data-id')
                 if (id) handleDelete(Number(id))
             })
         })
-        document.querySelectorAll('.btn-restore').forEach((btn) => {
+        document.querySelectorAll('.btn-restore').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.getAttribute('data-id')
                 if (id) handleRestore(Number(id))
             })
         })
-        document.querySelectorAll('.btn-force-delete').forEach((btn) => {
+        document.querySelectorAll('.btn-force-delete').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.getAttribute('data-id')
                 if (id) handleForceDelete(Number(id))
@@ -124,6 +125,8 @@ export default function VirtualTourIndex({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Virtual Tours" />
+            <VirtualTourLayout>
+
                 <div className="px-4 py-6">
                     <h1 className="text-2xl font-semibold mb-4">Virtual Tour Management</h1>
                     <div className="col-md-12">
@@ -155,6 +158,7 @@ export default function VirtualTourIndex({
                         />
                     </div>
                 </div>
+            </VirtualTourLayout>
         </AppLayout>
     )
 }

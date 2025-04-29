@@ -1,3 +1,4 @@
+// resources/js/Pages/Sphere/Index.tsx
 import { useRef, useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Head, Link, router } from '@inertiajs/react'
@@ -8,6 +9,7 @@ import DataTableWrapper, { DataTableWrapperRef } from '@/components/datatables'
 import { BreadcrumbItem } from '@/types'
 import clsx from 'clsx'
 import { Sphere } from '@/types/sphere'
+import VirtualTourLayout from '@/layouts/VirtualTours/Layout'
 
 const columns = (filter: string) => [
     { data: 'id', title: 'ID' },
@@ -57,8 +59,9 @@ export default function SphereIndex({ filter: initialFilter, success }: { filter
         })
     }
 
-const drawCallback = () => {
-        document.querySelectorAll('.inertia-link-cell').forEach((cell) => {
+    const drawCallback = () => {
+        // render inertia <Link> untuk edit
+        document.querySelectorAll('.inertia-link-cell').forEach(cell => {
             const id = cell.getAttribute('data-id')
             if (id) {
                 const root = ReactDOM.createRoot(cell)
@@ -72,19 +75,19 @@ const drawCallback = () => {
                 )
             }
         })
-        document.querySelectorAll('.btn-delete').forEach((btn) => {
+        document.querySelectorAll('.btn-delete').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.getAttribute('data-id')
                 if (id) handleDelete(Number(id))
             })
         })
-        document.querySelectorAll('.btn-restore').forEach((btn) => {
+        document.querySelectorAll('.btn-restore').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.getAttribute('data-id')
                 if (id) handleRestore(Number(id))
             })
         })
-        document.querySelectorAll('.btn-force-delete').forEach((btn) => {
+        document.querySelectorAll('.btn-force-delete').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.getAttribute('data-id')
                 if (id) handleForceDelete(Number(id))
@@ -117,27 +120,41 @@ const drawCallback = () => {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Spheres" />
-            <div className="px-4 py-6">
-                <h1 className="text-2xl font-semibold mb-4">Sphere Management</h1>
-                <HeadingSmall title="Spheres" description="Manage all spheres here." />
-                <div className="flex justify-between items-center mb-4">
-                    <Link href={route('sphere.create')}>
-                        <Button>Create Sphere</Button>
-                    </Link>
-                    {renderTabs()}
+            <VirtualTourLayout>
+                <div className="px-4 py-6">
+                    <h1 className="text-2xl font-semibold mb-4">Sphere Management</h1>
+                    <HeadingSmall title="Spheres" description="Manage all spheres here." />
+
+                    <div className="flex justify-between items-center mb-4">
+                        <Link href={route('sphere.create')}>
+                            <Button>Create Sphere</Button>
+                        </Link>
+                        {renderTabs()}
+                    </div>
+
+                    {success && (
+                        <div className="mb-4 p-2 bg-green-100 text-green-800 rounded">
+                            {success}
+                        </div>
+                    )}
+
+                    <div className="w-full overflow-x-auto">
+                        <DataTableWrapper
+                            key={filter}
+                            ref={dtRef}
+                            ajax={{
+                                url: route('sphere.json') + `?filter=${filter}`,
+                                type: 'POST',
+                            }}
+                            columns={columns(filter)}
+                            options={{
+                                drawCallback,
+
+                            }}
+                        />
+                    </div>
                 </div>
-                {success && <div className="mb-4 p-2 bg-green-100 text-green-800 rounded">{success}</div>}
-                <DataTableWrapper
-                    key={filter}
-                    ref={dtRef}
-                    ajax={{
-                        url: route('sphere.json') + `?filter=${filter}`,
-                        type: 'POST',
-                    }}
-                    columns={columns(filter)}
-                    options={{ drawCallback }}
-                />
-            </div>
+            </VirtualTourLayout>
         </AppLayout>
     )
 }

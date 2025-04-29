@@ -9,7 +9,6 @@ import { BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
 import { Category } from '@/types/category';
 import { VirtualTour } from '@/types/virtualTour';
-import { Textarea } from '@headlessui/react';
 import CustomSelect from '@/components/select';
 import VirtualTourLayout from '@/layouts/VirtualTours/Layout';
 
@@ -76,10 +75,11 @@ export default function VirtualTourForm({ virtualTour, categories = [] }: Props)
 
                                 <div>
                                     <Label htmlFor="description">Description</Label>
-                                    <Textarea
+                                    <textarea
                                         id="description"
                                         value={data.description}
                                         onChange={(e) => setData('description', e.target.value)}
+                                        className="border rounded p-2 w-full h-24"
                                     />
                                     <InputError message={errors.description} />
                                 </div>
