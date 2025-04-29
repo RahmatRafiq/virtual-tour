@@ -112,7 +112,6 @@ export default function SphereFormPage() {
         }
     }, [csrf, sphere?.sphere_file]);
 
-    // Setup dropzone untuk gambar 360
     useEffect(() => {
         if (imageRef.current) {
             const initialImages = sphere?.sphere_image
