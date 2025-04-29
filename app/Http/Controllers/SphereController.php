@@ -62,7 +62,15 @@ class SphereController extends Controller
 
         return response()->json($data);
     }
-
+    public function create()
+    {
+        return Inertia::render('Sphere/Form', [
+            'virtualTours' => VirtualTour::all(),
+            'sphere'       => null,
+            'sphere_file'  => null,
+            'sphere_image' => null,
+        ]);
+    }
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -110,7 +118,7 @@ class SphereController extends Controller
         $sphere      = Sphere::withTrashed()->with(['media'])->findOrFail($id);
         $sphereImage = $sphere->getMedia('sphere_image')->first();
         $sphereFile  = $sphere->getMedia('sphere_file')->first();
-        
+
         return Inertia::render('Sphere/Form', [
             'virtualTours' => VirtualTour::all(),
             'sphere'       => $sphere,
