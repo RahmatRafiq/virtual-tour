@@ -13,18 +13,18 @@ interface FileData {
 
 interface DropzoneOptions {
   urlStore: string;
-  urlDestroy: string;
   csrf: string;
   acceptedFiles: string;
   files?: FileData[];
   maxFiles: number;
   kind: string;
+  paramName: string;
 }
 
 const Dropzoner = (
   element: HTMLElement | null,
   key: string,
-  { urlStore, urlDestroy, csrf, acceptedFiles, files, maxFiles, kind }: DropzoneOptions
+  { urlStore, csrf, acceptedFiles, files, maxFiles, kind }: DropzoneOptions
 ): Dropzone => {
   if (!element) throw new Error('Element not found');
   if (!urlStore) throw new Error('URL Store not found');
@@ -76,21 +76,6 @@ const Dropzoner = (
         upload.size = response.size;
       }
       console.log('Upload successful');
-    },
-    removedfile: function (file) {
-      fetch(urlDestroy, {
-        method: 'DELETE',
-        headers: {
-          'X-CSRF-TOKEN': csrf,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ filename: file.name })
-      })
-        .then(res => res.json())
-        .then(data => console.log(data))
-        .catch(error => console.error(error));
-
-      file.previewElement?.parentNode?.removeChild(file.previewElement);
     },
     error: function (file, message: string | Error) {
       const errorMessage = message instanceof Error ? message.message : message;
