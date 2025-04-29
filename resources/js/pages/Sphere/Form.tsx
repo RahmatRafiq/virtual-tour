@@ -89,8 +89,8 @@ export default function SphereFormPage() {
             console.log('Initial Files:', initialFiles);
 
             const dz = Dropzoner(fileRef.current, 'sphere_file', {
-                urlStore: route('storage.destroy'),
-                urlDestroy: route('sphere.deleteFile'),
+                urlStore: route('storage.store'),
+                // urlDestroy: '',
                 csrf,
                 acceptedFiles: 'image/*',
                 maxFiles: 1,
@@ -124,8 +124,8 @@ export default function SphereFormPage() {
                 })) || [];
 
             const dz = Dropzoner(imageRef.current, 'sphere_image', {
-                urlStore: route('storage.destroy'),
-                urlDestroy: route('sphere.deleteFile'),
+                urlStore: route('storage.store'),
+                // urlDestroy: '',
                 csrf,
                 acceptedFiles: 'image/*',
                 maxFiles: 1,

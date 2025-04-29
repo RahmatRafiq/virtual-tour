@@ -75,7 +75,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
       }
       dzInstance.current = Dropzoner(dropzoneRef.current, 'profile-images', {
         urlStore: route('storage.destroy'),
-        urlDestroy: route('profile.deleteFile'),
         csrf: csrf_token,
         acceptedFiles: 'image/*',
         maxFiles: 3,
