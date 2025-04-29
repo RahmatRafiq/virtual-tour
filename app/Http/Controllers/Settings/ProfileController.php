@@ -106,20 +106,4 @@ class ProfileController extends Controller
 
         return redirect('/');
     }
-
-    public function deleteFile(Request $request)
-    {
-        $data = $request->validate(['filename' => 'required|string']);
-    
-        if (Storage::disk('profile-images')->exists($data['filename'])) {
-            Storage::disk('profile-images')->delete($data['filename']);
-        }
-    
-        $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::where('file_name', $data['filename'])->first();
-        if ($media) {
-            $media->delete();
-        }
-    
-        return response()->json(['message' => 'File berhasil dihapus'], 200);
-    }
 }
