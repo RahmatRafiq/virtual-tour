@@ -1,16 +1,16 @@
 // resources/js/Pages/VirtualTour/Index.tsx
 
-import { useRef, useState } from 'react'
-import ReactDOM from 'react-dom/client'
-import { Head, Link, router } from '@inertiajs/react'
-import AppLayout from '@/layouts/app-layout'
-import HeadingSmall from '@/components/heading-small'
-import { Button } from '@/components/ui/button'
-import DataTableWrapper, { DataTableWrapperRef } from '@/components/datatables'
-import { BreadcrumbItem } from '@/types'
-import clsx from 'clsx'
-import { VirtualTour } from '@/types/virtualTour'
-import VirtualTourLayout from '@/layouts/VirtualTours/Layout'
+import React, { useRef, useState } from 'react';
+import ReactDOM from 'react-dom/client';
+import { Head, Link, router } from '@inertiajs/react';
+import AppLayout from '@/layouts/app-layout';
+import HeadingSmall from '@/components/heading-small';
+import { Button } from '@/components/ui/button';
+import DataTableWrapper, { DataTableWrapperRef } from '@/components/datatables';
+import { BreadcrumbItem } from '@/types';
+import clsx from 'clsx';
+import { VirtualTour } from '@/types/virtualTour';
+import VirtualTourLayout from '@/layouts/VirtualTours/Layout';
 
 const columns = (filter: string) => [
     { data: 'id', title: 'ID' },
@@ -22,54 +22,58 @@ const columns = (filter: string) => [
         orderable: false,
         searchable: false,
         render: (_: null, __: string, row: unknown) => {
-            const tour = row as VirtualTour
-            let html = ''
+            const tour = row as VirtualTour;
+            let html = '';
+
             if (filter === 'trashed' || (filter === 'all' && tour.trashed)) {
-                html += `<button class="btn-restore ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700" data-id="${tour.id}">Restore</button>`
-                html += `<button class="btn-force-delete ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${tour.id}">Force Delete</button>`
+                html += `<button class="btn-restore ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700" data-id="${tour.id}">Restore</button>`;
+                html += `<button class="btn-force-delete ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${tour.id}">Force Delete</button>`;
             } else {
-                html += `<span class="inertia-link-cell" data-id="${tour.id}"></span>`
-                html += `<button class="btn-delete ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${tour.id}">Delete</button>`
+                html += `<button class="btn-view ml-2 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700" data-id="${tour.id}">View</button>`;
+                html += `<span class="inertia-link-cell" data-id="${tour.id}"></span>`;
+                html += `<button class="btn-delete ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700" data-id="${tour.id}">Delete</button>`;
             }
-            return html
+
+            return html;
         },
     },
-]
+];
 
 export default function VirtualTourIndex({
     filter: initialFilter,
     success,
 }: {
-    filter: string
-    success?: string
+    filter: string;
+    success?: string;
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Virtual Tours', href: '/virtual-tour' },
-    ]
-    const dtRef = useRef<DataTableWrapperRef>(null)
-    const [filter, setFilter] = useState(initialFilter || 'active')
+    ];
+    const dtRef = useRef<DataTableWrapperRef>(null);
+    const [filter, setFilter] = useState(initialFilter || 'active');
 
     const handleDelete = (id: number) => {
         router.delete(route('virtual-tour.destroy', id), {
             onSuccess: () => dtRef.current?.reload(),
-        })
-    }
+        });
+    };
     const handleRestore = (id: number) => {
         router.post(route('virtual-tour.restore', id), {}, {
             onSuccess: () => dtRef.current?.reload(),
-        })
-    }
+        });
+    };
     const handleForceDelete = (id: number) => {
         router.delete(route('virtual-tour.force-delete', id), {
             onSuccess: () => dtRef.current?.reload(),
-        })
-    }
+        });
+    };
 
     const drawCallback = () => {
+        // render Edit link
         document.querySelectorAll('.inertia-link-cell').forEach((cell) => {
-            const id = cell.getAttribute('data-id')
+            const id = cell.getAttribute('data-id');
             if (id) {
-                const root = ReactDOM.createRoot(cell)
+                const root = ReactDOM.createRoot(cell);
                 root.render(
                     <Link
                         href={`/virtual-tour/${id}/edit`}
@@ -77,31 +81,47 @@ export default function VirtualTourIndex({
                     >
                         Edit
                     </Link>
-                )
+                );
             }
-        })
-        document.querySelectorAll('.btn-delete').forEach(btn => {
+        });
+
+        // render View button behavior
+        document.querySelectorAll('.btn-view').forEach((btn) => {
             btn.addEventListener('click', () => {
-                const id = btn.getAttribute('data-id')
-                if (id) handleDelete(Number(id))
-            })
-        })
-        document.querySelectorAll('.btn-restore').forEach(btn => {
+                const id = btn.getAttribute('data-id');
+                if (id) {
+                    router.get(route('virtual-tour.show', Number(id)));
+                }
+            });
+        });
+
+        // render Delete button behavior
+        document.querySelectorAll('.btn-delete').forEach((btn) => {
             btn.addEventListener('click', () => {
-                const id = btn.getAttribute('data-id')
-                if (id) handleRestore(Number(id))
-            })
-        })
-        document.querySelectorAll('.btn-force-delete').forEach(btn => {
+                const id = btn.getAttribute('data-id');
+                if (id) handleDelete(Number(id));
+            });
+        });
+
+        // render Restore button behavior
+        document.querySelectorAll('.btn-restore').forEach((btn) => {
             btn.addEventListener('click', () => {
-                const id = btn.getAttribute('data-id')
-                if (id) handleForceDelete(Number(id))
-            })
-        })
-    }
+                const id = btn.getAttribute('data-id');
+                if (id) handleRestore(Number(id));
+            });
+        });
+
+        // render Force Delete button behavior
+        document.querySelectorAll('.btn-force-delete').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-id');
+                if (id) handleForceDelete(Number(id));
+            });
+        });
+    };
 
     const renderToggleTabs = () => {
-        const tabs = ['active', 'trashed', 'all']
+        const tabs = ['active', 'trashed', 'all'];
         return (
             <div className="inline-flex gap-1 rounded-lg bg-neutral-100 p-1 dark:bg-neutral-800">
                 {tabs.map((tab) => (
@@ -119,14 +139,13 @@ export default function VirtualTourIndex({
                     </button>
                 ))}
             </div>
-        )
-    }
+        );
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Virtual Tours" />
             <VirtualTourLayout>
-
                 <div className="px-4 py-6">
                     <h1 className="text-2xl font-semibold mb-4">Virtual Tour Management</h1>
                     <div className="col-md-12">
@@ -160,5 +179,5 @@ export default function VirtualTourIndex({
                 </div>
             </VirtualTourLayout>
         </AppLayout>
-    )
+    );
 }
