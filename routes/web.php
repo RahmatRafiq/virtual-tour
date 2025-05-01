@@ -55,6 +55,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('sphere/{sphere}/force-delete', [\App\Http\Controllers\SphereController::class, 'forceDelete'])->name('sphere.force-delete');
     Route::post('sphere/upload', [\App\Http\Controllers\SphereController::class, 'upload'])->name('sphere.upload');
 
+    Route::post('hotspot/json', [\App\Http\Controllers\HotspotController::class, 'json'])->name('hotspot.json');
+    Route::resource('hotspot', \App\Http\Controllers\HotspotController::class);
+    Route::get('hotspot/trashed', [\App\Http\Controllers\HotspotController::class, 'trashed'])->name('hotspot.trashed');
+    Route::post('hotspot/{hotspot}/restore', [\App\Http\Controllers\HotspotController::class, 'restore'])->name('hotspot.restore');
+    Route::delete('hotspot/{hotspot}/force-delete', [\App\Http\Controllers\HotspotController::class, 'forceDelete'])->name('hotspot.force-delete');
+
     Route::post('logout', [SocialAuthController::class, 'logout'])->name('logout');
 
 });
