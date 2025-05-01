@@ -1,9 +1,12 @@
 import React, { useRef, useEffect } from 'react';
-import { usePage } from '@inertiajs/react';
+import { usePage, Head } from '@inertiajs/react';
 import { Viewer } from 'photo-sphere-viewer';
 import { MarkersPlugin } from 'photo-sphere-viewer/dist/plugins/markers';
 import 'photo-sphere-viewer/dist/photo-sphere-viewer.css';
 import 'photo-sphere-viewer/dist/plugins/markers.css';
+import AppLayout from '@/layouts/app-layout';
+import VirtualTourLayout from '@/layouts/VirtualTours/Layout';
+import { BreadcrumbItem } from '@/types';
 
 type Hotspot = {
     id: number;
@@ -33,6 +36,10 @@ type VirtualTour = {
 export default function Show() {
     const { virtualTour } = usePage<{ virtualTour: VirtualTour }>().props;
     const containerRefs = useRef<Record<number, HTMLDivElement | null>>({});
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Virtual Tours', href: '/virtual-tour' },
+        { title: virtualTour.name, href: route('virtual-tour.show', virtualTour.id) },
+    ];
 
     useEffect(() => {
         virtualTour.spheres.forEach((sphere) => {
@@ -81,19 +88,24 @@ export default function Show() {
     }, [virtualTour.spheres]);
 
     return (
-        <div className="p-6 space-y-8">
-            <h1 className="text-3xl font-bold">{virtualTour.name}</h1>
-            <p className="text-gray-600">{virtualTour.description}</p>
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title={virtualTour.name} />
+            <VirtualTourLayout>
+                <div className="p-6 space-y-8">
+                    <h1 className="text-3xl font-bold">{virtualTour.name}</h1>
+                    <p className="text-gray-600">{virtualTour.description}</p>
 
-            {virtualTour.spheres.map((sphere) => (
-                <div key={sphere.id} className="border rounded-lg overflow-hidden">
-                    <h2 className="bg-gray-100 px-4 py-2 text-xl">{sphere.name}</h2>
-                    <div
-                        ref={(el) => { containerRefs.current[sphere.id] = el; }}
-                        style={{ width: '100%', height: '500px' }}
-                    />
+                    {virtualTour.spheres.map((sphere) => (
+                        <div key={sphere.id} className="border rounded-lg overflow-hidden">
+                            <h2 className="bg-gray-100 px-4 py-2 text-xl">{sphere.name}</h2>
+                            <div
+                                ref={(el) => { containerRefs.current[sphere.id] = el; }}
+                                style={{ width: '100%', height: '500px' }}
+                            />
+                        </div>
+                    ))}
                 </div>
-            ))}
-        </div>
+            </VirtualTourLayout>
+        </AppLayout>
     );
 }
