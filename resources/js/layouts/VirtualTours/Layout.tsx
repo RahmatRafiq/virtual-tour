@@ -19,7 +19,7 @@ const sidebarNavItems: NavItem[] = [
     },
     {
         title: 'Hotspot',
-        href: '/virtual-tours/hotspot',
+        href: '/hotspot',
         icon: null,
     },
 ];
