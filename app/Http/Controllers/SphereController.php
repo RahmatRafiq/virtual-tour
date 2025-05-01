@@ -55,10 +55,11 @@ class SphereController extends Controller
             'id'          => $sphere->id,
             'name'        => $sphere->name,
             'description' => $sphere->description,
-            'virtualTour' => $sphere->virtualTour->name,
+            'virtualTour' => optional($sphere->virtualTour)->name ?? '-', // <= Fix di sini
             'trashed'     => $sphere->trashed(),
             'actions'     => '',
         ]);
+        
 
         return response()->json($data);
     }
