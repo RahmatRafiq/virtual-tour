@@ -68,6 +68,20 @@ class VirtualTourController extends Controller
 
         return response()->json($data);
     }
+    public function show(VirtualTour $virtualTour)
+    {
+        
+        $virtualTour->load([
+            'category',
+            'spheres.hotspots.targetSphere', 
+            'spheres.hotspots.sphere',       
+            'spheres.media',                 
+        ]);
+        dd($virtualTour->toArray());
+        return Inertia::render('VirtualTour/Show', [
+            'virtualTour' => $virtualTour
+        ]);
+    }
     public function create()
     {
         $categories = Category::all();
