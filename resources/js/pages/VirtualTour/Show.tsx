@@ -1,11 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
-
-// core viewer
 import { Viewer } from 'photo-sphere-viewer';
-// plugin markers (hotspots)
 import { MarkersPlugin } from 'photo-sphere-viewer/dist/plugins/markers';
-// CSS untuk core & plugin
 import 'photo-sphere-viewer/dist/photo-sphere-viewer.css';
 import 'photo-sphere-viewer/dist/plugins/markers.css';
 
@@ -22,8 +18,9 @@ type Hotspot = {
 type Sphere = {
     id: number;
     name: string;
-    panorama_url: string;
+    panorama_url?: string;
     hotspots: Hotspot[];
+    media: { original_url: string }[];
 };
 
 type VirtualTour = {
@@ -42,9 +39,16 @@ export default function Show() {
             const container = containerRefs.current[sphere.id];
             if (!container) return;
 
+            const panoramaUrl = sphere.media[0]?.original_url;
+
+            if (!panoramaUrl) {
+                console.warn(`No panorama URL found for sphere ID: ${sphere.id}`);
+                return;
+            }
+
             const viewer = new Viewer({
                 container,
-                panorama: sphere.panorama_url,
+                panorama: panoramaUrl,
                 defaultLat: 0,
                 navbar: ['zoom', 'fullscreen'],
                 plugins: [
@@ -61,7 +65,6 @@ export default function Show() {
                 ],
             });
 
-            // event klik hotspot
             const markers = viewer.getPlugin(MarkersPlugin);
             if (!markers) return;
             markers.on('select-marker', (e: unknown, marker: { id: string }) => {

@@ -77,7 +77,7 @@ class VirtualTourController extends Controller
             'spheres.hotspots.sphere',       
             'spheres.media',                 
         ]);
-        dd($virtualTour->toArray());
+
         return Inertia::render('VirtualTour/Show', [
             'virtualTour' => $virtualTour
         ]);
