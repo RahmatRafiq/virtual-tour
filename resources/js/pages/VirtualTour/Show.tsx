@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { usePage, Head } from '@inertiajs/react';
 import { Viewer } from 'photo-sphere-viewer';
 import { MarkersPlugin } from 'photo-sphere-viewer/dist/plugins/markers';
@@ -51,7 +51,8 @@ export default function Show() {
     viewerRef.current = new Viewer({
       container: containerRef.current,
       panorama: '',
-      defaultLat: 0,
+      defaultLat: toRad(0),
+      defaultLong: toRad(0),
       navbar: ['zoom', 'fullscreen'],
       plugins: [[MarkersPlugin, { markers: [] }]],
     });
@@ -79,37 +80,45 @@ export default function Show() {
     console.log('⏳ Setting panorama...');
     viewerRef.current.setPanorama(url).then(() => {
       console.log('✅ Panorama set:', url);
-      const markersPlugin = viewerRef.current!.getPlugin(MarkersPlugin)!;
+      const markersPlugin = viewerRef.current?.getPlugin(MarkersPlugin);
+      if (!markersPlugin) {
+        console.error('❌ MarkersPlugin not initialized');
+        return;
+      }
+      console.log('✅ MarkersPlugin initialized');
 
       console.log('🧹 Clearing existing markers');
       markersPlugin.clearMarkers();
-
+      console.log('Hotspots data:', sphere.hotspots);
       console.log('🔖 Adding markers:', sphere.hotspots.length);
       sphere.hotspots.forEach(h => {
         console.log(`  ➤ Marker ${h.id}: yaw=${h.yaw}, pitch=${h.pitch}, type=${h.type}`);
 
-        // Convert yaw and pitch to radians
         const longitude = toRad(h.yaw);
         const latitude = toRad(h.pitch);
+        console.log(`Converted coordinates: longitude=${longitude}, latitude=${latitude}`);
 
-        // Add the marker
         markersPlugin.addMarker({
           id: String(h.id),
-          longitude, // longitude in radians
-          latitude, // latitude in radians
-          html: `
-            <div style="
-              width:24px;
-              height:24px;
-              background:${h.type === 'navigation' ? 'rgba(0,150,136,0.8)' : 'rgba(33,150,243,0.8)'};
-              border:2px solid white;
-              border-radius:50%;
-              cursor:pointer;
-            "></div>
-          `,
+          longitude,
+          visible: true,
+          latitude,
+          html: `<div style="width:40px;height:40px;background:red;color:white;display:flex;align-items:center;justify-content:center;border-radius:50%">M</div>`,
+
           anchor: 'center center',
           tooltip: h.tooltip || undefined,
         });
+        setTimeout(() => {
+          const markerElement = document.querySelector(`[data-marker-id="${h.id}"]`);
+          console.log(`🔍 DOM for marker ${h.id}:`, markerElement);
+          if (markerElement instanceof HTMLElement) {
+            const rect = markerElement.getBoundingClientRect();
+            console.log(`📐 Marker ${h.id} position and size:`, rect);
+          } else {
+            console.warn(`⚠️ Marker DOM for ${h.id} not found`);
+          }
+        }, 500);
+        
       });
       console.log('✅ Markers added');
 
