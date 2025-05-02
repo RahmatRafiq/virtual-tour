@@ -57,8 +57,8 @@ export default function Show() {
       plugins: [[MarkersPlugin, { markers: [] }]],
     });
     console.log('✅ Viewer initialized');
-    return () => { 
-      viewerRef.current?.destroy(); 
+    return () => {
+      viewerRef.current?.destroy();
       console.log('🗑 Viewer destroyed');
     };
   }, []);
@@ -97,9 +97,9 @@ export default function Show() {
           anchor: 'center center',
           circle: 20,
           style: {
-            fill: h.type === 'navigation' 
-                    ? 'rgba(0,150,136,0.8)' 
-                    : 'rgba(33,150,243,0.8)',
+            fill: h.type === 'navigation'
+              ? 'rgba(0,150,136,0.8)'
+              : 'rgba(33,150,243,0.8)',
             stroke: '#fff',
             strokeWidth: '2',
           },
