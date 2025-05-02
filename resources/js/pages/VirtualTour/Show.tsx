@@ -45,7 +45,6 @@ export default function Show() {
     return deg * Math.PI / 180;
   }
 
-  // 1) Instantiate viewer once
   useEffect(() => {
     console.log('⏳ Initializing PSV Viewer');
     if (!containerRef.current) return;
@@ -63,7 +62,6 @@ export default function Show() {
     };
   }, []);
 
-  // 2) On sphere change: load panorama & markers
   useEffect(() => {
     const sphere = virtualTour.spheres[currentIndex];
     console.log(`\n🔄 Loading sphere index ${currentIndex}: "${sphere.name}"`);
@@ -81,28 +79,36 @@ export default function Show() {
     console.log('⏳ Setting panorama...');
     viewerRef.current.setPanorama(url).then(() => {
       console.log('✅ Panorama set:', url);
-
       const markersPlugin = viewerRef.current!.getPlugin(MarkersPlugin)!;
+
       console.log('🧹 Clearing existing markers');
       markersPlugin.clearMarkers();
 
       console.log('🔖 Adding markers:', sphere.hotspots.length);
       sphere.hotspots.forEach(h => {
         console.log(`  ➤ Marker ${h.id}: yaw=${h.yaw}, pitch=${h.pitch}, type=${h.type}`);
+
+        // Convert yaw and pitch to radians
+        const longitude = toRad(h.yaw);
+        const latitude = toRad(h.pitch);
+
+        // Add the marker
         markersPlugin.addMarker({
           id: String(h.id),
-          longitude: toRad(h.yaw),
-          latitude: toRad(h.pitch),
-          tooltip: h.tooltip || undefined,
+          longitude, // longitude in radians
+          latitude, // latitude in radians
+          html: `
+            <div style="
+              width:24px;
+              height:24px;
+              background:${h.type === 'navigation' ? 'rgba(0,150,136,0.8)' : 'rgba(33,150,243,0.8)'};
+              border:2px solid white;
+              border-radius:50%;
+              cursor:pointer;
+            "></div>
+          `,
           anchor: 'center center',
-          circle: 20,
-          style: {
-            fill: h.type === 'navigation'
-              ? 'rgba(0,150,136,0.8)'
-              : 'rgba(33,150,243,0.8)',
-            stroke: '#fff',
-            strokeWidth: '2',
-          },
+          tooltip: h.tooltip || undefined,
         });
       });
       console.log('✅ Markers added');
