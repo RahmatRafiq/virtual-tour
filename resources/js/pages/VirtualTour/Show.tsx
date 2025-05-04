@@ -1,16 +1,15 @@
 import { useRef, useEffect, useState } from 'react';
+import { createRoot } from 'react-dom/client';
 import { usePage, Head } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import VirtualTourLayout from '@/layouts/VirtualTours/Layout';
 import { Viewer, PluginConstructor } from '@photo-sphere-viewer/core';
 import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 import { BreadcrumbItem } from '@/types';
-
-// CSS PSV harus diimport di entry utama atau di komponen teratas
 import '@photo-sphere-viewer/core/index.css';
 import '@photo-sphere-viewer/markers-plugin/index.css';
+import HotspotMarker from '@/components/HotspotMarker';
 
-// Tipe data sesuai API Inertia
 type Hotspot = {
   id: number;
   type: 'navigation' | 'info';
@@ -35,7 +34,6 @@ type VirtualTour = {
   spheres: Sphere[];
 };
 
-// Extend typing untuk events pada MarkersPlugin
 interface MarkersPluginWithEvents extends MarkersPlugin {
   addEventListener(
     event: 'select-marker',
@@ -56,7 +54,6 @@ export default function Show() {
     { title: virtualTour.name, href: route('virtual-tour.show', virtualTour.id) },
   ];
 
-  // Inisialisasi viewer dan event listener sekali saja
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -88,9 +85,8 @@ export default function Show() {
     });
 
     return () => viewer.destroy();
-  }, []);
+  }, [currentIndex, virtualTour.spheres]);
 
-  // Update panorama dan markers saat currentIndex berubah
   useEffect(() => {
     const viewer = viewerRef.current;
     if (!viewer) return;
@@ -105,12 +101,16 @@ export default function Show() {
       .setPanorama(url)
       .then(() => {
         markersPlugin.clearMarkers();
+
         sphere.hotspots.forEach((hotspot) => {
+          const markerEl = document.createElement('div');
+          createRoot(markerEl).render(<HotspotMarker hotspot={hotspot} />);
+
           markersPlugin.addMarker({
             id: String(hotspot.id),
             position: { yaw: toRad(hotspot.yaw), pitch: toRad(hotspot.pitch) },
-            tooltip: hotspot.tooltip || undefined,
-            html: `<div class="bg-red-500 text-white px-2 py-1 rounded">${hotspot.type}</div>`,
+            element: markerEl,
+            anchor: 'center bottom',
           });
         });
       })
