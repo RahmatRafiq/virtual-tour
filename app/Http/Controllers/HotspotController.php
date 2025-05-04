@@ -69,9 +69,17 @@ class HotspotController extends Controller
 
     public function create()
     {
+        $spheres = Sphere::with('media')->get(); // Pastikan media sphere dimuat
+
         return Inertia::render('Hotspot/Form', [
             'hotspot' => null,
-            'spheres' => Sphere::all(),
+            'spheres' => $spheres->map(function ($sphere) {
+                return [
+                    'id'    => $sphere->id,
+                    'name'  => $sphere->name,
+                    'media' => $sphere->getFirstMediaUrl('sphere_image'), // URL media sphere
+                ];
+            }),
         ]);
     }
 
@@ -99,10 +107,16 @@ class HotspotController extends Controller
     public function edit($id)
     {
         $hotspot = Hotspot::withTrashed()->findOrFail($id);
-
+        $spheres = Sphere::with('media')->get();
         return Inertia::render('Hotspot/Form', [
             'hotspot' => $hotspot,
-            'spheres' => Sphere::all(),
+            'spheres' => $spheres->map(function ($sphere) {
+                return [
+                    'id'    => $sphere->id,
+                    'name'  => $sphere->name,
+                    'media' => $sphere->getFirstMediaUrl('sphere_image'), // URL media sphere
+                ];
+            }),
         ]);
     }
 
