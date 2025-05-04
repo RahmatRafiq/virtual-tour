@@ -19,6 +19,7 @@ export default defineConfig({
     },
     resolve: {
         alias: {
+            three: resolve(__dirname, 'node_modules/three'),
             'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
             '@markers-plugin': resolve(__dirname, 'node_modules/@photo-sphere-viewer/markers-plugin'),
         },
