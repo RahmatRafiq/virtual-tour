@@ -1,5 +1,5 @@
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Hotspot, Sphere } from '@/types/SphereView';
+import { ClickEvent, Hotspot, MarkersPluginWithEvents, Sphere } from '@/types/SphereView';
 import { Transition } from '@headlessui/react';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useRef } from 'react';
@@ -13,6 +13,7 @@ import AppLayout from '@/layouts/app-layout';
 import VirtualTourLayout from '@/layouts/VirtualTours/Layout';
 import CustomSelect from '@/components/select';
 import { Viewer, PluginConstructor } from '@photo-sphere-viewer/core';
+
 import { createRoot } from 'react-dom/client';
 import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 import '@photo-sphere-viewer/core/index.css';
@@ -88,8 +89,9 @@ export default function HotspotFormPage() {
             });
         }
 
-        viewer.addEventListener('click', (e) => {
-            const position = (e as { position?: { yaw: number; pitch: number } }).position;
+
+        viewer.addEventListener('click', (e: ClickEvent & { type: "click" }) => {
+            const position = e.position;
             if (position) {
                 const { yaw, pitch } = position;
                 setData((prevData) => ({
