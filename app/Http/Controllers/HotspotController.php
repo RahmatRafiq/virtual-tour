@@ -112,9 +112,10 @@ class HotspotController extends Controller
             'hotspot' => $hotspot,
             'spheres' => $spheres->map(function ($sphere) {
                 return [
-                    'id'    => $sphere->id,
-                    'name'  => $sphere->name,
-                    'media' => $sphere->getFirstMediaUrl('sphere_file'), // URL media sphere
+                    'id'          => $sphere->id,
+                    'name'        => $sphere->name,
+                    'sphere_file'  => $sphere->getFirstMediaUrl('sphere_file'), // URL media sphere_file
+                    'sphere_image' => $sphere->getFirstMediaUrl('sphere_image'), // URL media sphere_image
                 ];
             }),
         ]);

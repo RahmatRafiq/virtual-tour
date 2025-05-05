@@ -19,11 +19,26 @@ import '@photo-sphere-viewer/markers-plugin/index.css';
 import HotspotMarker from '@/components/HotspotMarker';
 
 export default function HotspotFormPage() {
+    type NewType = SharedData & {
+        hotspot?: {
+            id: number;
+            sphere_id: number;
+            type: string;
+            yaw: number;
+            pitch: number;
+            tooltip: string;
+            content: string;
+        };
+        spheres: Array<{
+            id: number;
+            name: string;
+            sphere_file: string;
+            sphere_image: string; // Additional property for sphere image
+        }>;
+    };
+
     const { hotspot, spheres } = usePage<
-        SharedData & {
-            hotspot?: { id: number; sphere_id: number; type: string; yaw: number; pitch: number; tooltip: string; content: string };
-            spheres: Array<{ id: number; name: string; media: string }>;
-        }
+        NewType
     >().props;
 
     const isEdit = !!hotspot;
@@ -47,19 +62,19 @@ export default function HotspotFormPage() {
 
     useEffect(() => {
         if (!containerRef.current || !spheres) return;
-    
+
         const sphere = spheres.find((s) => s.id === data.sphere_id);
-        if (!sphere || !sphere.media) return;
-    
+        if (!sphere || !sphere.sphere_file) return;
+
         const viewer = new Viewer({
             container: containerRef.current,
-            panorama: sphere.media,
+            panorama: sphere.sphere_file,
             plugins: [[MarkersPlugin as unknown as PluginConstructor, {}]],
         });
         viewerRef.current = viewer;
-    
+
         const markersPlugin = viewer.getPlugin(MarkersPlugin as unknown as PluginConstructor) as unknown as MarkersPlugin;
-    
+
         // Tambahkan marker ke posisi tertentu
         if (markersPlugin) {
             const markerElement = document.createElement('div');
@@ -70,13 +85,14 @@ export default function HotspotFormPage() {
                         type: 'info',
                         yaw: data.yaw,
                         pitch: data.pitch,
-                        tooltip: 'This is a custom marker!',
-                        content: null,
+                        tooltip: data.tooltip || 'This is a custom marker!',
+                        content: data.content || 'This is the content of the marker.',
                         target_sphere: null,
+                        sphere: sphere,
                     }}
                 />
             );
-    
+
             markersPlugin.addMarker({
                 id: 'custom-marker',
                 element: markerElement,
@@ -84,8 +100,7 @@ export default function HotspotFormPage() {
                 anchor: 'center bottom',
             });
         }
-    
-        // Tambahkan event listener untuk menangkap klik
+
         viewer.addEventListener('click', (e) => {
             const position = (e as { position?: { yaw: number; pitch: number } }).position; // Explicitly define the type for position
             if (position) {
@@ -97,9 +112,9 @@ export default function HotspotFormPage() {
                 }));
             }
         });
-    
+
         return () => viewer.destroy();
-    }, [data.sphere_id, spheres, data.yaw, data.pitch, setData]);
+    }, [data.sphere_id, spheres, data.yaw, data.pitch, data.content, data.tooltip, setData]);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
