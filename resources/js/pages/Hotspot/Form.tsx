@@ -1,7 +1,8 @@
 import { type BreadcrumbItem, type SharedData } from '@/types';
+import { ClickEvent, Hotspot, MarkersPluginWithEvents, Sphere } from '@/types/SphereView';
 import { Transition } from '@headlessui/react';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useEffect, useRef } from 'react';
 
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
@@ -11,12 +12,21 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import VirtualTourLayout from '@/layouts/VirtualTours/Layout';
 import CustomSelect from '@/components/select';
-import { Hotspot } from '@/types/hotspot';
+import { Viewer, PluginConstructor } from '@photo-sphere-viewer/core';
+
+import { createRoot } from 'react-dom/client';
+import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
+import '@photo-sphere-viewer/core/index.css';
+import '@photo-sphere-viewer/markers-plugin/index.css';
+import HotspotMarker from '@/components/HotspotMarker';
 
 export default function HotspotFormPage() {
-    const { hotspot, spheres } = usePage<
-        SharedData & { hotspot?: Hotspot; spheres?: Array<{ id: number; name: string }> }
-    >().props;
+    type NewType = SharedData & {
+        hotspot?: Hotspot;
+        spheres: Sphere[];
+    };
+
+    const { hotspot, spheres } = usePage<NewType>().props;
 
     const isEdit = !!hotspot;
 
@@ -25,16 +35,75 @@ export default function HotspotFormPage() {
         { title: isEdit ? 'Edit Hotspot' : 'Create Hotspot', href: '#' },
     ];
 
-    const { data, setData, post, put, processing, errors, recentlySuccessful } =
-        useForm({
-            sphere_id: hotspot?.sphere_id || (spheres?.[0]?.id ?? 0),
-            type: hotspot?.type || '',
-            target_sphere_id: hotspot?.target_sphere_id || null,
-            yaw: hotspot?.yaw || 0,
-            pitch: hotspot?.pitch || 0,
-            tooltip: hotspot?.tooltip || '',
-            content: hotspot?.content || '',
+    const { data, setData, post, put, processing, errors, recentlySuccessful } = useForm({
+        sphere_id: hotspot?.sphere?.id || (spheres[0]?.id ?? 0),
+        type: hotspot?.type || '',
+        yaw: hotspot?.yaw || 0,
+        pitch: hotspot?.pitch || 0,
+        tooltip: hotspot?.tooltip || '',
+        content: hotspot?.content || '',
+    });
+
+    const containerRef = useRef<HTMLDivElement>(null);
+    const viewerRef = useRef<Viewer | null>(null);
+
+    useEffect(() => {
+        if (!containerRef.current || !spheres) return;
+
+        const sphere = spheres.find((s) => s.id === data.sphere_id);
+        if (!sphere || !sphere.sphere_file) return;
+
+        const viewer = new Viewer({
+            container: containerRef.current,
+            panorama: sphere.sphere_file,
+            plugins: [[MarkersPlugin as unknown as PluginConstructor, {}]],
         });
+        viewerRef.current = viewer;
+
+        const markersPlugin = viewer.getPlugin(MarkersPlugin as unknown as PluginConstructor) as unknown as MarkersPluginWithEvents;
+
+        if (markersPlugin) {
+            markersPlugin.clearMarkers();
+
+            const markerElement = document.createElement('div');
+            createRoot(markerElement).render(
+                <HotspotMarker
+                    hotspot={{
+                        id: 1,
+                        type: 'info',
+                        yaw: data.yaw,
+                        pitch: data.pitch,
+                        tooltip: data.tooltip || 'This is a custom marker!',
+                        content: data.content || 'This is the content of the marker.',
+                        target_sphere: null,
+                        sphere: sphere,
+                    }}
+                />
+            );
+
+            markersPlugin.addMarker({
+                id: 'custom-marker',
+                element: markerElement,
+                position: { yaw: (data.yaw * Math.PI) / 180, pitch: (data.pitch * Math.PI) / 180 },
+                anchor: 'center bottom',
+            });
+        }
+
+
+        viewer.addEventListener('click', (e: ClickEvent & { type: "click" }) => {
+            const position = e.position;
+            if (position) {
+                const { yaw, pitch } = position;
+                setData((prevData) => ({
+                    ...prevData,
+                    yaw: parseFloat(((yaw * 180) / Math.PI).toFixed(2)),
+                    pitch: parseFloat(((pitch * 180) / Math.PI).toFixed(2)),
+                }));
+            }
+        });
+
+        return () => viewer.destroy();
+    }, [data.sphere_id, spheres, data.yaw, data.pitch, data.content, data.tooltip, setData]);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -61,69 +130,32 @@ export default function HotspotFormPage() {
                             <CustomSelect
                                 id="sphere_id"
                                 isMulti={false}
-                                options={spheres?.map((sphere) => ({
+                                options={spheres.map((sphere) => ({
                                     value: sphere.id,
                                     label: sphere.name,
-                                })) || []}
-                                value={
-                                    spheres
-                                        ?.map((sphere) => ({ value: sphere.id, label: sphere.name }))
-                                        .find((opt) => opt.value === data.sphere_id) || null
-                                }
+                                }))}
+                                value={spheres
+                                    .map((sphere) => ({
+                                        value: sphere.id,
+                                        label: sphere.name,
+                                    }))
+                                    .find((opt) => opt.value === data.sphere_id) || null}
                                 onChange={(selected) => {
-                                    setData(
-                                        'sphere_id',
-                                        (selected as { value: number })?.value ?? 0
-                                    );
+                                    setData('sphere_id', (selected as { value: number })?.value ?? 0);
                                 }}
                             />
                             <InputError message={errors.sphere_id} />
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="type">Type</Label>
-                            <CustomSelect
-                                id="type"
-                                isMulti={false}
-                                options={[
-                                    { value: 'navigation', label: 'Navigation' },
-                                    { value: 'info', label: 'Info' },
-                                ]}
-                                value={
-                                    [
-                                        { value: 'navigation', label: 'Navigation' },
-                                        { value: 'info', label: 'Info' },
-                                    ].find((opt) => opt.value === data.type) || null
-                                }
-                                onChange={(selected) => {
-                                    setData('type', (selected as { value: string })?.value ?? '');
-                                }}
+                            <Label>Sphere Viewer</Label>
+                            <div
+                                ref={containerRef}
+                                style={{ width: '100%', height: '400px', border: '1px solid #ccc' }}
                             />
-                            <InputError message={errors.type} />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="target_sphere_id">Target Sphere</Label>
-                            <CustomSelect
-                                id="target_sphere_id"
-                                isMulti={false}
-                                options={spheres?.map((sphere) => ({
-                                    value: sphere.id,
-                                    label: sphere.name,
-                                })) || []}
-                                value={
-                                    spheres
-                                        ?.map((sphere) => ({ value: sphere.id, label: sphere.name }))
-                                        .find((opt) => opt.value === data.target_sphere_id) || null
-                                }
-                                onChange={(selected) => {
-                                    setData(
-                                        'target_sphere_id',
-                                        (selected as { value: number })?.value ?? null
-                                    );
-                                }}
-                            />
-                            <InputError message={errors.target_sphere_id} />
+                            <p className="text-sm text-gray-500">
+                                Click on the sphere to set yaw and pitch values.
+                            </p>
                         </div>
 
                         <div className="grid gap-2">

@@ -1,73 +1,48 @@
-type Hotspot = {
-    id: number;
-    type: 'navigation' | 'info';
-    yaw: number;
-    pitch: number;
-    tooltip: string | null;
-    content: string | null;
-    target_sphere: { id: number; name: string } | null;
-};
+import React from 'react';
+import { Info, ArrowRight } from 'lucide-react';
+import { Hotspot } from '@/types/SphereView';
+
+
 
 type Props = {
     hotspot: Hotspot;
 };
 
 export default function HotspotMarker({ hotspot }: Props) {
-    const color = hotspot.type === 'navigation' ? '#2563EB' : '#059669';
-    const label = hotspot.type === 'navigation' ? '' : 'ℹ️';
-
+    const isInfo = hotspot.type === 'info';
+    const borderColor = isInfo ? 'border-green-600' : 'border-blue-600';
+    const IconComponent = isInfo ? Info : ArrowRight;
     return (
-        <div
-            style={{
-                position: 'relative',
-                width: 40,
-                height: 40,
-                transform: 'translate(-50%, -100%)',
-            }}
-        >
+        <div className="relative w-0 h-0 overflow-visible transform -translate-x-1/2 -translate-y-full">
             <div
-                style={{
-                    width: 36,
-                    height: 36,
-                    border: `4px solid ${color}`,
-                    borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.1)',
-                    boxShadow: '0 0 8px rgba(0,0,0,0.4)',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                }}
-            />
-            <div
-                style={{
-                    position: 'absolute',
-                    top: 8,
-                    left: 10,
-                    color,
-                    fontSize: 14,
-                    fontWeight: 'bold',
-                }}
+                className={`w-8 h-8 rounded-full border-2 ${borderColor} bg-white flex items-center justify-center shadow-md`}
             >
-                {label}
+                <IconComponent className={`w-4 h-4 ${isInfo ? 'text-green-600' : 'text-blue-600'}`} />
             </div>
-            {hotspot.tooltip && (
-                <div
-                    style={{
-                        position: 'absolute',
-                        bottom: '100%',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        marginBottom: 6,
-                        background: 'rgba(0,0,0,0.75)',
-                        color: 'white',
-                        padding: '4px 8px',
-                        borderRadius: 4,
-                        fontSize: 12,
-                        whiteSpace: 'nowrap',
-                        pointerEvents: 'none',
-                    }}
-                >
-                    {hotspot.tooltip}
+
+            <img
+                src={hotspot.sphere?.sphere_image}
+                alt={hotspot.sphere?.name ?? 'sphere image'}
+                style={{
+                    border: '2px solid red',
+                    zIndex: 9999,
+                    position: 'absolute',
+                }}
+                className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-20 w-32 h-20 object-cover rounded-md shadow-lg pointer-events-none"
+            />
+
+            {(hotspot.tooltip || hotspot.content) && (
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 bg-white bg-opacity-90 backdrop-blur-sm border border-gray-200 rounded-md p-2 shadow-lg max-w-xs text-center pointer-events-none">
+                    {hotspot.tooltip && (
+                        <div className="text-sm font-semibold text-gray-900 truncate" title={hotspot.tooltip}>
+                            {hotspot.tooltip}
+                        </div>
+                    )}
+                    {hotspot.content && (
+                        <div className="text-xs text-gray-700 mt-1 whitespace-normal" title={hotspot.content}>
+                            {hotspot.content}
+                        </div>
+                    )}
                 </div>
             )}
         </div>

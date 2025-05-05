@@ -6,41 +6,10 @@ import VirtualTourLayout from '@/layouts/VirtualTours/Layout';
 import { Viewer, PluginConstructor } from '@photo-sphere-viewer/core';
 import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 import { BreadcrumbItem } from '@/types';
+import { VirtualTour, MarkersPluginWithEvents } from '@/types/SphereView';
 import '@photo-sphere-viewer/core/index.css';
 import '@photo-sphere-viewer/markers-plugin/index.css';
 import HotspotMarker from '@/components/HotspotMarker';
-
-type Hotspot = {
-  id: number;
-  type: 'navigation' | 'info';
-  yaw: number;
-  pitch: number;
-  tooltip: string | null;
-  content: string | null;
-  target_sphere: { id: number; name: string } | null;
-};
-
-type Sphere = {
-  id: number;
-  name: string;
-  media: { original_url: string }[];
-  hotspots: Hotspot[];
-};
-
-type VirtualTour = {
-  id: number;
-  name: string;
-  description: string;
-  spheres: Sphere[];
-};
-
-interface MarkersPluginWithEvents extends MarkersPlugin {
-  addEventListener(
-    event: 'select-marker',
-    callback: (e: { marker: { id: string } }) => void,
-    options?: boolean | AddEventListenerOptions
-  ): void;
-}
 
 export default function Show() {
   const { virtualTour } = usePage<{ virtualTour: VirtualTour }>().props;
@@ -49,6 +18,7 @@ export default function Show() {
   const viewerRef = useRef<Viewer | null>(null);
 
   const toRad = (deg: number) => (deg * Math.PI) / 180;
+
   const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Virtual Tours', href: '/virtual-tour' },
     { title: virtualTour.name, href: route('virtual-tour.show', virtualTour.id) },
@@ -67,7 +37,7 @@ export default function Show() {
     const markersPlugin =
       viewer.getPlugin(MarkersPlugin as unknown as PluginConstructor) as unknown as MarkersPluginWithEvents;
 
-    markersPlugin.addEventListener('select-marker', (event) => {
+    markersPlugin.addEventListener('select-marker', (event: { marker: { id: string } }) => {
       const markerId = event.marker.id;
       const hotspot = virtualTour.spheres[currentIndex].hotspots.find(
         (h) => String(h.id) === markerId
@@ -76,7 +46,7 @@ export default function Show() {
 
       if (hotspot.type === 'navigation' && hotspot.target_sphere) {
         const targetIndex = virtualTour.spheres.findIndex(
-          (s) => s.id === hotspot.target_sphere!.id
+          (s) => hotspot.target_sphere && s.id === hotspot.target_sphere.id
         );
         if (targetIndex >= 0) setCurrentIndex(targetIndex);
       } else if (hotspot.type === 'info') {
