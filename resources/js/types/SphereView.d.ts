@@ -30,6 +30,13 @@ export type VirtualTour = {
   spheres: Sphere[];
 };
 
+export type ClickEvent = {
+  position?: {
+      yaw: number;
+      pitch: number;
+  };
+};
+
 export interface MarkersPluginWithEvents extends MarkersPlugin {
   addEventListener(
     event: 'select-marker',
