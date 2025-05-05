@@ -1,4 +1,5 @@
 import { type BreadcrumbItem, type SharedData } from '@/types';
+import { Hotspot, Sphere } from '@/types/SphereView';
 import { Transition } from '@headlessui/react';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useRef } from 'react';
@@ -20,26 +21,11 @@ import HotspotMarker from '@/components/HotspotMarker';
 
 export default function HotspotFormPage() {
     type NewType = SharedData & {
-        hotspot?: {
-            id: number;
-            sphere_id: number;
-            type: string;
-            yaw: number;
-            pitch: number;
-            tooltip: string;
-            content: string;
-        };
-        spheres: Array<{
-            id: number;
-            name: string;
-            sphere_file: string;
-            sphere_image: string; // Additional property for sphere image
-        }>;
+        hotspot?: Hotspot;
+        spheres: Sphere[];
     };
 
-    const { hotspot, spheres } = usePage<
-        NewType
-    >().props;
+    const { hotspot, spheres } = usePage<NewType>().props;
 
     const isEdit = !!hotspot;
 
@@ -49,7 +35,7 @@ export default function HotspotFormPage() {
     ];
 
     const { data, setData, post, put, processing, errors, recentlySuccessful } = useForm({
-        sphere_id: hotspot?.sphere_id || (spheres[0]?.id ?? 0),
+        sphere_id: hotspot?.sphere?.id || (spheres[0]?.id ?? 0),
         type: hotspot?.type || '',
         yaw: hotspot?.yaw || 0,
         pitch: hotspot?.pitch || 0,
@@ -73,10 +59,11 @@ export default function HotspotFormPage() {
         });
         viewerRef.current = viewer;
 
-        const markersPlugin = viewer.getPlugin(MarkersPlugin as unknown as PluginConstructor) as unknown as MarkersPlugin;
+        const markersPlugin = viewer.getPlugin(MarkersPlugin as unknown as PluginConstructor) as unknown as MarkersPluginWithEvents;
 
-        // Tambahkan marker ke posisi tertentu
         if (markersPlugin) {
+            markersPlugin.clearMarkers();
+
             const markerElement = document.createElement('div');
             createRoot(markerElement).render(
                 <HotspotMarker
@@ -102,7 +89,7 @@ export default function HotspotFormPage() {
         }
 
         viewer.addEventListener('click', (e) => {
-            const position = (e as { position?: { yaw: number; pitch: number } }).position; // Explicitly define the type for position
+            const position = (e as { position?: { yaw: number; pitch: number } }).position;
             if (position) {
                 const { yaw, pitch } = position;
                 setData((prevData) => ({

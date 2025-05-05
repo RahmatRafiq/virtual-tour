@@ -1,21 +1,8 @@
 import React from 'react';
 import { Info, ArrowRight } from 'lucide-react';
+import { Hotspot } from '@/types/SphereView';
 
-type Hotspot = {
-    id: number;
-    type: 'navigation' | 'info';
-    yaw: number;
-    pitch: number;
-    tooltip: string | null;
-    content: string | null;
-    target_sphere: { id: number; name: string } | null;
-    sphere: {
-        id: number;
-        name: string;
-        sphere_file: string;
-        sphere_image: string;
-    } | null;
-};
+
 
 type Props = {
     hotspot: Hotspot;
