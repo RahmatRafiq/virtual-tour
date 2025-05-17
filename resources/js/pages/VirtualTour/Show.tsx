@@ -27,9 +27,13 @@ export default function Show() {
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const firstSphere = virtualTour.spheres[0];
+    const firstPanoramaUrl = firstSphere?.media?.[0]?.original_url;
+    if (!firstPanoramaUrl) return;
+
     const viewer = new Viewer({
       container: containerRef.current,
-      panorama: virtualTour.spheres[0].media[0].original_url,
+      panorama: firstPanoramaUrl,
       plugins: [[MarkersPlugin as unknown as PluginConstructor, {}]],
     });
     viewerRef.current = viewer;
@@ -96,7 +100,7 @@ export default function Show() {
           <p className="text-gray-600">{virtualTour.description}</p>
           <div className="border rounded-lg overflow-hidden">
             <h2 className="bg-gray-100 px-4 py-2 text-xl">
-              {virtualTour.spheres[currentIndex].name}
+              {virtualTour.spheres[currentIndex]?.name ?? 'No Sphere'}
             </h2>
             <div ref={containerRef} style={{ width: '100%', height: '500px' }} />
           </div>
