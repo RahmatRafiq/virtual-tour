@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Helpers\DataTable;
 use App\Models\Hotspot;
 use App\Models\Sphere;
+use App\Models\VirtualTour;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -19,9 +20,10 @@ class HotspotController extends Controller
             default => Hotspot::with(['sphere', 'targetSphere'])->get(),
         };
 
-        return Inertia::render('Hotspot/Index', [
-            'hotspots' => $hotspots,
-            'filter'   => $filter,
+        $virtualTours = VirtualTour::with('spheres:id,virtual_tour_id,name')->get(['id', 'name']);return Inertia::render('Hotspot/Index', [
+            'hotspots'     => $hotspots,
+            'filter'       => $filter,
+            'virtualTours' => $virtualTours,
         ]);
     }
 
@@ -112,9 +114,9 @@ class HotspotController extends Controller
             'hotspot' => $hotspot,
             'spheres' => $spheres->map(function ($sphere) {
                 return [
-                    'id'          => $sphere->id,
-                    'name'        => $sphere->name,
-                    'sphere_file'  => $sphere->getFirstMediaUrl('sphere_file'), // URL media sphere_file
+                    'id'           => $sphere->id,
+                    'name'         => $sphere->name,
+                    'sphere_file'  => $sphere->getFirstMediaUrl('sphere_file'),  // URL media sphere_file
                     'sphere_image' => $sphere->getFirstMediaUrl('sphere_image'), // URL media sphere_image
                 ];
             }),
