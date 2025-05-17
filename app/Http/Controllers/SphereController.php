@@ -21,14 +21,16 @@ class SphereController extends Controller
         };
 
         return Inertia::render('Sphere/Index', [
-            'spheres' => $spheres,
-            'filter'  => $filter,
+            'spheres'      => $spheres,
+            'filter'       => $filter,
+            'virtualTours' => VirtualTour::select('id', 'name')->get(), // Tambah ini
         ]);
     }
     public function json(Request $request)
     {
-        $search = $request->input('search.value', '');
-        $filter = $request->input('filter', 'active');
+        $search        = $request->input('search.value', '');
+        $filter        = $request->input('filter', 'active');
+        $virtualTourId = $request->input('virtual_tour_id'); // Tambah ini
 
         $query = match ($filter) {
             'trashed' => Sphere::onlyTrashed()->with('virtualTour'),
@@ -36,13 +38,16 @@ class SphereController extends Controller
             default => Sphere::with('virtualTour'),
         };
 
+        if ($virtualTourId) {
+            $query->where('virtual_tour_id', $virtualTourId);
+        }
+
         if ($search) {
             $query->where(fn($q) =>
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")
             );
         }
-
         $columns = ['id', 'name', 'description', 'created_at', 'updated_at'];
         if ($request->filled('order')) {
             $col = $columns[$request->order[0]['column']] ?? 'id';
@@ -59,7 +64,6 @@ class SphereController extends Controller
             'trashed'     => $sphere->trashed(),
             'actions'     => '',
         ]);
-        
 
         return response()->json($data);
     }
