@@ -138,7 +138,7 @@ export default function SphereIndex({
                                 onChange={opt => {
                                     setVirtualTourId(opt ? (opt as VirtualTourOption).value : null)
                                 }}
-                                menuPortalTarget={document.body}
+                                menuPortalTarget={typeof window !== "undefined" ? document.body : undefined} // <--- Tambahkan ini
                                 styles={{
                                     menuPortal: base => ({ ...base, zIndex: 9999 }),
                                 }}

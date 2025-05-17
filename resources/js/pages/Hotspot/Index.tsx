@@ -140,6 +140,7 @@ export default function HotspotIndex({
                                 placeholder="Select Virtual Tour"
                                 options={virtualTourOptions}
                                 value={virtualTourOptions.find(opt => opt.value === (virtualTourId ?? undefined)) || null}
+                                menuPortalTarget={typeof window !== "undefined" ? document.body : undefined} // <--- Tambahkan ini
                                 onChange={opt => {
                                     setVirtualTourId(opt ? (opt as VirtualTourOption).value : null)
                                 }}
