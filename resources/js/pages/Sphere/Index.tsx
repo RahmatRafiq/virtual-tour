@@ -1,4 +1,3 @@
-// resources/js/Pages/Sphere/Index.tsx
 import { useRef, useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Head, Link, router } from '@inertiajs/react'
@@ -10,6 +9,9 @@ import { BreadcrumbItem } from '@/types'
 import { Sphere } from '@/types/sphere'
 import VirtualTourLayout from '@/layouts/VirtualTours/Layout'
 import ToggleTabs from '@/components/toggle-tabs'
+import CustomSelect from '@/components/select'
+
+type VirtualTourOption = { value: number | 'all'; label: string }
 
 const columns = (filter: string) => [
     { data: 'id', title: 'ID' },
@@ -36,12 +38,21 @@ const columns = (filter: string) => [
     },
 ]
 
-export default function SphereIndex({ filter: initialFilter, success }: { filter: string; success?: string }) {
+export default function SphereIndex({
+    filter: initialFilter,
+    success,
+    virtualTours,
+}: {
+    filter: string
+    success?: string
+    virtualTours: { id: number; name: string }[]
+}) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Spheres', href: '/sphere' },
     ]
     const dtRef = useRef<DataTableWrapperRef>(null)
     const [filter, setFilter] = useState(initialFilter || 'active')
+    const [virtualTourId, setVirtualTourId] = useState<number | 'all' | null>(null)
 
     const handleDelete = (id: number) => {
         router.delete(route('sphere.destroy', id), {
@@ -60,7 +71,6 @@ export default function SphereIndex({ filter: initialFilter, success }: { filter
     }
 
     const drawCallback = () => {
-        // render inertia <Link> untuk edit
         document.querySelectorAll('.inertia-link-cell').forEach(cell => {
             const id = cell.getAttribute('data-id')
             if (id) {
@@ -95,7 +105,13 @@ export default function SphereIndex({ filter: initialFilter, success }: { filter
         })
     }
 
-
+    const virtualTourOptions: VirtualTourOption[] = [
+        { value: 'all', label: 'All Virtual Tour' },
+        ...virtualTours.map(vt => ({
+            value: vt.id,
+            label: vt.name,
+        })),
+    ]
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -111,8 +127,23 @@ export default function SphereIndex({ filter: initialFilter, success }: { filter
                             <Button>Create Sphere</Button>
                         </Link>
                     </div>
-                    <div className="mb-4">
+                    <div className="mb-4 flex gap-4 justify-between">
                         <ToggleTabs tabs={['active', 'trashed', 'all']} active={filter} onChange={setFilter} />
+                        <div className="w-64 z-50">
+                            <CustomSelect
+                                isClearable={false}
+                                placeholder="Please select a Virtual Tour"
+                                options={virtualTourOptions}
+                                value={virtualTourOptions.find(opt => opt.value === (virtualTourId ?? undefined)) || null}
+                                onChange={opt => {
+                                    setVirtualTourId(opt ? (opt as VirtualTourOption).value : null)
+                                }}
+                                menuPortalTarget={typeof window !== "undefined" ? document.body : undefined} // <--- Tambahkan ini
+                                styles={{
+                                    menuPortal: base => ({ ...base, zIndex: 9999 }),
+                                }}
+                            />
+                        </div>
                     </div>
                     {success && (
                         <div className="mb-4 p-2 bg-green-100 text-green-800 rounded">
@@ -121,16 +152,24 @@ export default function SphereIndex({ filter: initialFilter, success }: { filter
                     )}
 
                     <div className="w-full overflow-x-auto">
-                        <DataTableWrapper
-                            key={filter}
-                            ref={dtRef}
-                            ajax={{
-                                url: route('sphere.json') + `?filter=${filter}`,
-                                type: 'POST',
-                            }}
-                            columns={columns(filter)}
-                            options={{ drawCallback, }}
-                        />
+                        {virtualTourId === null ? (
+                            <div className="text-gray-500 p-4">Please select a Virtual Tour first.</div>
+                        ) : (
+                            <DataTableWrapper
+                                key={filter + '-' + virtualTourId}
+                                ref={dtRef}
+                                ajax={{
+                                    url: route('sphere.json') + `?filter=${filter}`,
+                                    type: 'POST',
+                                    data: (d: Record<string, unknown>) => ({
+                                        ...d,
+                                        virtual_tour_id: virtualTourId === 'all' ? undefined : virtualTourId,
+                                    }),
+                                }}
+                                columns={columns(filter)}
+                                options={{ drawCallback }}
+                            />
+                        )}
                     </div>
                 </div>
             </VirtualTourLayout>

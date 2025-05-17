@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Helpers\DataTable;
 use App\Models\Hotspot;
 use App\Models\Sphere;
+use App\Models\VirtualTour;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -19,22 +20,30 @@ class HotspotController extends Controller
             default => Hotspot::with(['sphere', 'targetSphere'])->get(),
         };
 
-        return Inertia::render('Hotspot/Index', [
-            'hotspots' => $hotspots,
-            'filter'   => $filter,
+        $virtualTours = VirtualTour::with('spheres:id,virtual_tour_id,name')->get(['id', 'name']);return Inertia::render('Hotspot/Index', [
+            'hotspots'     => $hotspots,
+            'filter'       => $filter,
+            'virtualTours' => $virtualTours,
         ]);
     }
 
     public function json(Request $request)
     {
-        $search = $request->input('search.value', '');
-        $filter = $request->input('filter', 'active');
+        $search        = $request->input('search.value', '');
+        $filter        = $request->input('filter', 'active');
+        $virtualTourId = $request->input('virtual_tour_id'); // Ambil virtual_tour_id dari request
 
         $query = match ($filter) {
             'trashed' => Hotspot::onlyTrashed()->with(['sphere', 'targetSphere']),
             'all' => Hotspot::withTrashed()->with(['sphere', 'targetSphere']),
             default => Hotspot::with(['sphere', 'targetSphere']),
         };
+
+        if ($virtualTourId) {
+            $query->whereHas('sphere', function ($q) use ($virtualTourId) {
+                $q->where('virtual_tour_id', $virtualTourId);
+            });
+        }
 
         if ($search) {
             $query->where(fn($q) =>
@@ -43,7 +52,6 @@ class HotspotController extends Controller
                     ->orWhere('content', 'like', "%{$search}%")
             );
         }
-
         $columns = ['id', 'type', 'tooltip', 'yaw', 'pitch', 'created_at'];
         if ($request->filled('order')) {
             $col = $columns[$request->order[0]['column']] ?? 'id';
@@ -69,20 +77,27 @@ class HotspotController extends Controller
 
     public function create()
     {
-        $spheres = Sphere::with('media')->get(); // Pastikan media sphere dimuat
+        $virtualTours = VirtualTour::with(['spheres.media'])->get();
+        $spheres      = Sphere::with('media')->get();
 
         return Inertia::render('Hotspot/Form', [
-            'hotspot' => null,
-            'spheres' => $spheres->map(function ($sphere) {
+            'hotspot'      => null,
+            'spheres'      => $spheres->map(function ($sphere) {
                 return [
-                    'id'    => $sphere->id,
-                    'name'  => $sphere->name,
-                    'media' => $sphere->getFirstMediaUrl('sphere_file'), // URL media sphere
+                    'id'              => $sphere->id,
+                    'name'            => $sphere->name,
+                    'virtual_tour_id' => $sphere->virtual_tour_id,
+                    'sphere_file'     => $sphere->getFirstMediaUrl('sphere_file'),
+                ];
+            }),
+            'virtualTours' => $virtualTours->map(function ($vt) {
+                return [
+                    'id'   => $vt->id,
+                    'name' => $vt->name,
                 ];
             }),
         ]);
     }
-
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -106,16 +121,24 @@ class HotspotController extends Controller
 
     public function edit($id)
     {
-        $hotspot = Hotspot::withTrashed()->findOrFail($id);
-        $spheres = Sphere::with('media')->get();
+        $hotspot      = Hotspot::withTrashed()->with('sphere')->findOrFail($id);
+        $virtualTours = VirtualTour::with(['spheres.media'])->get();
+        $spheres      = Sphere::with('media')->get();
+
         return Inertia::render('Hotspot/Form', [
-            'hotspot' => $hotspot,
-            'spheres' => $spheres->map(function ($sphere) {
+            'hotspot'      => $hotspot,
+            'spheres'      => $spheres->map(function ($sphere) {
                 return [
-                    'id'          => $sphere->id,
-                    'name'        => $sphere->name,
-                    'sphere_file'  => $sphere->getFirstMediaUrl('sphere_file'), // URL media sphere_file
-                    'sphere_image' => $sphere->getFirstMediaUrl('sphere_image'), // URL media sphere_image
+                    'id'              => $sphere->id,
+                    'name'            => $sphere->name,
+                    'virtual_tour_id' => $sphere->virtual_tour_id,
+                    'sphere_file'     => $sphere->getFirstMediaUrl('sphere_file'),
+                ];
+            }),
+            'virtualTours' => $virtualTours->map(function ($vt) {
+                return [
+                    'id'   => $vt->id,
+                    'name' => $vt->name,
                 ];
             }),
         ]);
