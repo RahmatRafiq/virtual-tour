@@ -2,7 +2,7 @@ import { type BreadcrumbItem, type SharedData } from '@/types';
 import { ClickEvent, Hotspot, MarkersPluginWithEvents, Sphere } from '@/types/SphereView';
 import { Transition } from '@headlessui/react';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { FormEventHandler, useEffect, useRef } from 'react';
+import { FormEventHandler, useEffect, useRef, useState } from 'react';
 
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
@@ -21,28 +21,58 @@ import '@photo-sphere-viewer/markers-plugin/index.css';
 import HotspotMarker from '@/components/HotspotMarker';
 
 export default function HotspotFormPage() {
+    type VirtualTour = {
+        id: number;
+        name: string;
+    };
+    type SphereWithVirtualTour = Sphere & { virtual_tour_id: number };
+
     type NewType = SharedData & {
         hotspot?: Hotspot;
-        spheres: Sphere[];
+        spheres: SphereWithVirtualTour[];
+        virtualTours: VirtualTour[];
     };
 
-    const { hotspot, spheres } = usePage<NewType>().props;
+    const { hotspot, spheres, virtualTours } = usePage<NewType>().props as {
+        hotspot?: Omit<Hotspot, 'sphere'> & { sphere?: SphereWithVirtualTour };
+        spheres: SphereWithVirtualTour[];
+        virtualTours: VirtualTour[];
+    };
 
     const isEdit = !!hotspot;
 
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Hotspots', href: route('hotspot.index') },
-        { title: isEdit ? 'Edit Hotspot' : 'Create Hotspot', href: '#' },
-    ];
+    const initialVirtualTourId = isEdit
+        ? hotspot?.sphere?.virtual_tour_id ?? null
+        : null;
+    const initialSphereId = isEdit
+        ? hotspot?.sphere?.id ?? null
+        : null;
+
+    const [virtualTourId, setVirtualTourId] = useState<number | null>(initialVirtualTourId);
+    const filteredSpheres = virtualTourId
+        ? spheres.filter(s => s.virtual_tour_id === virtualTourId)
+        : [];
 
     const { data, setData, post, put, processing, errors, recentlySuccessful } = useForm({
-        sphere_id: hotspot?.sphere?.id || (spheres[0]?.id ?? 0),
+        sphere_id: initialSphereId ?? 0,
         type: hotspot?.type || '',
         yaw: hotspot?.yaw || 0,
         pitch: hotspot?.pitch || 0,
         tooltip: hotspot?.tooltip || '',
         content: hotspot?.content || '',
     });
+
+    useEffect(() => {
+        if (
+            virtualTourId &&
+            !filteredSpheres.some(s => s.id === data.sphere_id)
+        ) {
+            setData('sphere_id', filteredSpheres[0]?.id ?? 0);
+        }
+        if (!virtualTourId) {
+            setData('sphere_id', 0);
+        }
+    }, [virtualTourId]);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const viewerRef = useRef<Viewer | null>(null);
@@ -89,7 +119,6 @@ export default function HotspotFormPage() {
             });
         }
 
-
         viewer.addEventListener('click', (e: ClickEvent & { type: "click" }) => {
             const position = e.position;
             if (position) {
@@ -114,6 +143,11 @@ export default function HotspotFormPage() {
         }
     };
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Hotspots', href: route('hotspot.index') },
+        { title: isEdit ? 'Edit Hotspot' : 'Create Hotspot', href: '#' },
+    ];
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={isEdit ? 'Edit Hotspot' : 'Create Hotspot'} />
@@ -126,23 +160,69 @@ export default function HotspotFormPage() {
 
                     <form onSubmit={submit} className="space-y-6">
                         <div className="grid gap-2">
+                            <Label htmlFor="type">Type</Label>
+                            <CustomSelect
+                                id="type"
+                                isMulti={false}
+                                options={[
+                                    { value: 'navigation', label: 'Navigation' },
+                                    { value: 'info', label: 'Info' },
+                                ]}
+                                value={
+                                    [
+                                        { value: 'navigation', label: 'Navigation' },
+                                        { value: 'info', label: 'Info' },
+                                    ].find(opt => opt.value === data.type) || null
+                                }
+                                onChange={selected => setData('type', (selected as { value: string })?.value ?? '')}
+                                placeholder="Pilih tipe hotspot"
+                            />
+                            <InputError message={errors.type} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="virtual_tour_id">Virtual Tour</Label>
+                            <CustomSelect
+                                id="virtual_tour_id"
+                                isMulti={false}
+                                options={virtualTours.map(vt => ({
+                                    value: vt.id,
+                                    label: vt.name,
+                                }))}
+                                value={
+                                    virtualTours
+                                        .map(vt => ({ value: vt.id, label: vt.name }))
+                                        .find(opt => opt.value === virtualTourId) || null
+                                }
+                                onChange={selected => {
+                                    const vtId = (selected as { value: number })?.value ?? null;
+                                    setVirtualTourId(vtId);
+                                }}
+                                placeholder="Pilih Virtual Tour"
+                            />
+                        </div>
+
+                        <div className="grid gap-2">
                             <Label htmlFor="sphere_id">Sphere</Label>
                             <CustomSelect
                                 id="sphere_id"
                                 isMulti={false}
-                                options={spheres.map((sphere) => ({
+                                options={filteredSpheres.map((sphere) => ({
                                     value: sphere.id,
                                     label: sphere.name,
                                 }))}
-                                value={spheres
-                                    .map((sphere) => ({
-                                        value: sphere.id,
-                                        label: sphere.name,
-                                    }))
-                                    .find((opt) => opt.value === data.sphere_id) || null}
+                                value={
+                                    filteredSpheres
+                                        .map((sphere) => ({
+                                            value: sphere.id,
+                                            label: sphere.name,
+                                        }))
+                                        .find((opt) => opt.value === data.sphere_id) || null
+                                }
                                 onChange={(selected) => {
                                     setData('sphere_id', (selected as { value: number })?.value ?? 0);
                                 }}
+                                isDisabled={!virtualTourId}
+                                placeholder="Pilih Sphere"
                             />
                             <InputError message={errors.sphere_id} />
                         </div>
