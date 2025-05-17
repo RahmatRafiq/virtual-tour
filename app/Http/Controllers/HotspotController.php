@@ -29,14 +29,21 @@ class HotspotController extends Controller
 
     public function json(Request $request)
     {
-        $search = $request->input('search.value', '');
-        $filter = $request->input('filter', 'active');
+        $search        = $request->input('search.value', '');
+        $filter        = $request->input('filter', 'active');
+        $virtualTourId = $request->input('virtual_tour_id'); // Ambil virtual_tour_id dari request
 
         $query = match ($filter) {
             'trashed' => Hotspot::onlyTrashed()->with(['sphere', 'targetSphere']),
             'all' => Hotspot::withTrashed()->with(['sphere', 'targetSphere']),
             default => Hotspot::with(['sphere', 'targetSphere']),
         };
+
+        if ($virtualTourId) {
+            $query->whereHas('sphere', function ($q) use ($virtualTourId) {
+                $q->where('virtual_tour_id', $virtualTourId);
+            });
+        }
 
         if ($search) {
             $query->where(fn($q) =>
@@ -45,7 +52,6 @@ class HotspotController extends Controller
                     ->orWhere('content', 'like', "%{$search}%")
             );
         }
-
         $columns = ['id', 'type', 'tooltip', 'yaw', 'pitch', 'created_at'];
         if ($request->filled('order')) {
             $col = $columns[$request->order[0]['column']] ?? 'id';
