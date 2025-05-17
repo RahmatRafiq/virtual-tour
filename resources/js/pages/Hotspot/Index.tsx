@@ -137,7 +137,7 @@ export default function HotspotIndex({
                         <div className="w-64">
                             <CustomSelect
                                 isClearable={false}
-                                placeholder="Pilih Virtual Tour"
+                                placeholder="Select Virtual Tour"
                                 options={virtualTourOptions}
                                 value={virtualTourOptions.find(opt => opt.value === (virtualTourId ?? undefined)) || null}
                                 onChange={opt => {

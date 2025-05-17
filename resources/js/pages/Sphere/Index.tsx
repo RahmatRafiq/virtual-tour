@@ -132,7 +132,7 @@ export default function SphereIndex({
                         <div className="w-64 z-50">
                             <CustomSelect
                                 isClearable={false}
-                                placeholder="Silakan pilih Virtual Tour"
+                                placeholder="Please select a Virtual Tour"
                                 options={virtualTourOptions}
                                 value={virtualTourOptions.find(opt => opt.value === (virtualTourId ?? undefined)) || null}
                                 onChange={opt => {
@@ -153,7 +153,7 @@ export default function SphereIndex({
 
                     <div className="w-full overflow-x-auto">
                         {virtualTourId === null ? (
-                            <div className="text-gray-500 p-4">Silakan pilih Virtual Tour terlebih dahulu.</div>
+                            <div className="text-gray-500 p-4">Please select a Virtual Tour first.</div>
                         ) : (
                             <DataTableWrapper
                                 key={filter + '-' + virtualTourId}
