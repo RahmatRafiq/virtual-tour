@@ -14,27 +14,70 @@ class SphereController extends Controller
     public function index(Request $request)
     {
         $filter  = $request->query('filter', 'active');
-        $spheres = match ($filter) {
-            'trashed' => Sphere::onlyTrashed()->with('virtualTour')->get(),
-            'all' => Sphere::withTrashed()->with('virtualTour')->get(),
-            default => Sphere::with('virtualTour')->get(),
+        $vtQuery = match ($filter) {
+            'trashed' => VirtualTour::onlyTrashed(),
+            'all' => VirtualTour::withTrashed(),
+            default => VirtualTour::query(),
         };
+        $virtualTours = $vtQuery->get(['id', 'name', 'description']);
 
         return Inertia::render('Sphere/Index', [
-            'spheres' => $spheres,
-            'filter'  => $filter,
+            'filter'       => $filter,
+            'virtualTours' => $virtualTours,
+            'success'      => session('success'),
         ]);
     }
-    public function json(Request $request)
+
+    public function VirtualTourJson(Request $request)
     {
         $search = $request->input('search.value', '');
         $filter = $request->input('filter', 'active');
+
+        $query = match ($filter) {
+            'trashed' => VirtualTour::onlyTrashed(),
+            'all' => VirtualTour::withTrashed(),
+            default => VirtualTour::query(),
+        };
+
+        if ($search) {
+            $query->where('name', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%");
+        }
+
+        $cols = ['id', 'name', 'description', 'created_at', 'updated_at'];
+        if ($request->filled('order')) {
+            $col = $cols[$request->order[0]['column']] ?? 'id';
+            $dir = $request->order[0]['dir'];
+            $query->orderBy($col, $dir);
+        }
+
+        $data = DataTable::paginate($query, $request);
+
+        $data['data'] = collect($data['data'])->map(fn($vt) => [
+            'id'          => $vt->id,
+            'name'        => $vt->name,
+            'description' => $vt->description,
+            'trashed'     => $vt->trashed(),
+        ])->toArray();
+
+        return response()->json($data);
+    }
+
+    public function json(Request $request)
+    {
+        $search        = $request->input('search.value', '');
+        $filter        = $request->input('filter', 'active');
+        $VirtualTourId = $request->input('virtual_tour_id');
 
         $query = match ($filter) {
             'trashed' => Sphere::onlyTrashed()->with('virtualTour'),
             'all' => Sphere::withTrashed()->with('virtualTour'),
             default => Sphere::with('virtualTour'),
         };
+
+        if ($VirtualTourId) {
+            $query->where('virtual_tour_id', $VirtualTourId);
+        }
 
         if ($search) {
             $query->where(fn($q) =>
@@ -51,18 +94,18 @@ class SphereController extends Controller
 
         $data = DataTable::paginate($query, $request);
 
-        $data['data'] = collect($data['data'])->map(fn($sphere) => [
-            'id'          => $sphere->id,
-            'name'        => $sphere->name,
-            'description' => $sphere->description,
-            'virtualTour' => optional($sphere->virtualTour)->name ?? '-', // <= Fix di sini
-            'trashed'     => $sphere->trashed(),
+        $data['data'] = collect($data['data'])->map(fn($s) => [
+            'id'          => $s->id,
+            'name'        => $s->name,
+            'virtualTour' => optional($s->virtualTour)->name ?? '-',
+            'description' => $s->description,
+            'trashed'     => $s->trashed(),
             'actions'     => '',
         ]);
-        
 
         return response()->json($data);
     }
+
     public function create()
     {
         return Inertia::render('Sphere/Form', [

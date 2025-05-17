@@ -56,11 +56,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('sphere/upload', [\App\Http\Controllers\SphereController::class, 'upload'])->name('sphere.upload');
 
     Route::post('hotspot/json', [\App\Http\Controllers\HotspotController::class, 'json'])->name('hotspot.json');
+    Route::post('/sphere/vt-json', [\App\Http\Controllers\SphereController::class, 'VirtualTourJson'])->name('sphere.vt-json');
     Route::resource('hotspot', \App\Http\Controllers\HotspotController::class);
     Route::get('hotspot/trashed', [\App\Http\Controllers\HotspotController::class, 'trashed'])->name('hotspot.trashed');
     Route::post('hotspot/{hotspot}/restore', [\App\Http\Controllers\HotspotController::class, 'restore'])->name('hotspot.restore');
     Route::delete('hotspot/{hotspot}/force-delete', [\App\Http\Controllers\HotspotController::class, 'forceDelete'])->name('hotspot.force-delete');
-
+    
     Route::post('logout', [SocialAuthController::class, 'logout'])->name('logout');
 
 });
