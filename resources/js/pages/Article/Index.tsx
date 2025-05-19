@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button';
 import DataTableWrapper, { DataTableWrapperRef } from '@/components/datatables';
 import { BreadcrumbItem } from '@/types';
 import { Category } from '@/types/category';
-import { Article } from '@/types/article';
 import ToggleTabs from '@/components/toggle-tabs';
 import CustomSelect from '@/components/select';
+import { Article } from '@/types/Article';
 
 export default function ArticleIndex() {
     const { filter: initialFilter, categories } = usePage<{
