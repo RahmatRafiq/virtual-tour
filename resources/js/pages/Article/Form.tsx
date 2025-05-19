@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import CustomSelect from '@/components/select';
 import Dropzoner from '@/components/dropzoner';
+import { Textarea } from '@headlessui/react';
 
 type ArticleFormProps = {
     article?: {
@@ -156,7 +157,7 @@ export default function ArticleFormPage() {
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="content">Content</Label>
-                        <textarea
+                        <Textarea
                             id="content"
                             value={data.content}
                             onChange={(e) => setData('content', e.target.value)}
@@ -167,10 +168,19 @@ export default function ArticleFormPage() {
 
                     <div className="grid gap-2">
                         <Label htmlFor="tags">Tags (comma separated)</Label>
-                        <Input
+                        <CustomSelect
+                            isMulti
+                            isCreatable 
                             id="tags"
-                            value={data.tags.join(', ')}
-                            onChange={(e) => setData('tags', e.target.value.split(',').map(t => t.trim()).filter(Boolean))}
+                            value={data.tags.map((tag: string) => ({ value: tag, label: tag }))}
+                            onChange={(selected) => {
+                                setData(
+                                    'tags',
+                                    (selected as { value: string; label: string }[]).map(opt => opt.value)
+                                );
+                            }}
+                            placeholder="Type and press enter…"
+                            classNamePrefix="react-select"
                         />
                         <InputError message={errors.tags} />
                     </div>

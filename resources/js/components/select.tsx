@@ -1,7 +1,13 @@
 import React from 'react';
 import Select, { Props as SelectProps, StylesConfig } from 'react-select';
+import CreatableSelect from 'react-select/creatable';
 
-export default function CustomSelect<OptionType>(props: SelectProps<OptionType>) {
+type CustomSelectProps<OptionType> = SelectProps<OptionType> & {
+  isCreatable?: boolean;
+};
+
+export default function CustomSelect<OptionType>(props: CustomSelectProps<OptionType>) {
+  const { isCreatable, ...restProps } = props;
   const customStyles: StylesConfig<OptionType, boolean> = {
     control: (provided, state) => ({
       ...provided,
@@ -28,8 +34,8 @@ export default function CustomSelect<OptionType>(props: SelectProps<OptionType>)
       backgroundColor: state.isSelected
         ? '#3b82f6' // blue-500
         : state.isFocused
-        ? 'rgba(59, 130, 246, 0.1)' // blue-500/10
-        : 'transparent',
+          ? 'rgba(59, 130, 246, 0.1)' // blue-500/10
+          : 'transparent',
       color: state.isSelected ? '#ffffff' : '#111827', // white or gray-900
       cursor: 'pointer',
       '&:hover': {
@@ -62,10 +68,18 @@ export default function CustomSelect<OptionType>(props: SelectProps<OptionType>)
       },
     }),
   };
-
+  if (isCreatable) {
+    return (
+      <CreatableSelect
+        {...restProps}
+        styles={customStyles}
+        classNamePrefix="react-select"
+      />
+    );
+  }
   return (
     <Select
-      {...props}
+      {...restProps}
       styles={customStyles}
       classNamePrefix="react-select"
     />
