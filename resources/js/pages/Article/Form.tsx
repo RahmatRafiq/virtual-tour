@@ -21,7 +21,11 @@ type ArticleFormProps = {
         media?: { collection_name: string; original_url: string }[];
     };
     categories: { id: number; name: string }[];
-    cover?: { original_url: string };
+    cover?: {
+        original_url: string
+        file_name: string
+        size: number
+    };
 };
 
 export default function ArticleFormPage() {
@@ -39,8 +43,8 @@ export default function ArticleFormPage() {
         cover
             ? [{
                 original_url: cover.original_url,
-                file_name: cover.original_url.split('/').pop() || 'unknown',
-                size: 0,
+                file_name: cover.file_name,
+                size: cover.size || 0,
             }]
             : [];
 
@@ -84,6 +88,10 @@ export default function ArticleFormPage() {
 
         dz.on('success', (_file, response: { name: string }) => {
             setData('cover', [response.name]);
+        });
+
+        dz.on('error', (file: Dropzone.DropzoneFile,) => {
+            dz.removeFile(file);
         });
 
         dz.on('removedfile', (file: { name: string }) => {
