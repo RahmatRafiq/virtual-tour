@@ -10,7 +10,7 @@ export interface Article {
     slug: string;
     content: string;
     tags: string[] | string;
-    trashed: boolean;
+     trashed?: boolean;
     media?: { collection_name: string; original_url: string }[];
 }
 

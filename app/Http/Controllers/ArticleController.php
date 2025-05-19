@@ -21,11 +21,12 @@ class ArticleController extends Controller
             default => Article::with('category')->get(),
         };
 
+        $categories = Category::where('type', 'article')->select('id', 'name')->get();
+
         return Inertia::render('Article/Index', [
             'articles'   => $articles,
             'filter'     => $filter,
-            'categories' => Category::select('id', 'name')->get(),
-        ]);
+            'categories' => $categories]);
     }
 
     public function json(Request $request)
@@ -153,7 +154,7 @@ class ArticleController extends Controller
                 'slug' => Str::slug($request->input('title')),
             ]);
         }
-        
+
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'title'       => 'required|string|max:255',

@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import DataTableWrapper, { DataTableWrapperRef } from '@/components/datatables';
 import { BreadcrumbItem } from '@/types';
 import { Category } from '@/types/category';
-import clsx from 'clsx';
 import { Article } from '@/types/article';
+import ToggleTabs from '@/components/toggle-tabs';
+import CustomSelect from '@/components/select';
 
 export default function ArticleIndex() {
     const { filter: initialFilter, categories } = usePage<{
@@ -19,7 +20,7 @@ export default function ArticleIndex() {
     const breadcrumbs: BreadcrumbItem[] = [{ title: 'Articles', href: '/article' }];
     const dtRef = useRef<DataTableWrapperRef>(null);
     const [filter, setFilter] = useState(initialFilter || 'active');
-    const [categoryId, setCategoryId] = useState<number | ''>('');
+    const [categoryId, setCategoryId] = useState<number | 'all'>('all');
 
     const columns = [
         { data: 'id', title: 'ID' },
@@ -34,7 +35,7 @@ export default function ArticleIndex() {
             orderable: false,
             searchable: false,
             render: (_: null, __: string, row: unknown) => {
-                const article = row as Article
+                const article = row as Article;
                 let html = '';
                 if (filter === 'trashed' || (filter === 'all' && article.trashed)) {
                     html += `<button class="btn-restore ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700" data-id="${article.id}">Restore</button>`;
@@ -102,27 +103,10 @@ export default function ArticleIndex() {
         });
     };
 
-    const renderToggleTabs = () => {
-        const tabs = ['active', 'trashed', 'all'];
-        return (
-            <div className="inline-flex gap-1 rounded-lg bg-neutral-100 p-1 dark:bg-neutral-800">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setFilter(tab)}
-                        className={clsx(
-                            'flex items-center rounded-md px-3.5 py-1.5 transition-colors',
-                            filter === tab
-                                ? 'bg-white shadow-xs dark:bg-neutral-700 dark:text-neutral-100'
-                                : 'text-neutral-500 hover:bg-neutral-200/60 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-700/60'
-                        )}
-                    >
-                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    </button>
-                ))}
-            </div>
-        );
-    };
+    const categoryOptions = [
+        { value: 'all', label: 'All Categories' },
+        ...categories.map(cat => ({ value: cat.id, label: cat.name })),
+    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -137,28 +121,37 @@ export default function ArticleIndex() {
                             <Button>Create Article</Button>
                         </Link>
                     </div>
-                    <div className="mb-4 flex gap-2 items-center">
-                        {renderToggleTabs()}
-                        <select
-                            className="ml-4 border rounded px-2 py-1"
-                            value={categoryId}
-                            onChange={e => setCategoryId(e.target.value ? Number(e.target.value) : '')}
-                        >
-                            <option value="">All Categories</option>
-                            {categories.map((cat) => (
-                                <option key={cat.id} value={cat.id}>{cat.name}</option>
-                            ))}
-                        </select>
+                    <div className="mb-4 flex gap-4 items-center">
+                        <ToggleTabs tabs={['active', 'trashed', 'all']} active={filter} onChange={setFilter} />
+                        <div className="w-64">
+                            <CustomSelect
+                                isClearable={false}
+                                options={categoryOptions}
+                                value={categoryOptions.find(opt => opt.value === categoryId) || categoryOptions[0]}
+                                onChange={opt => {
+                                    if (opt && !Array.isArray(opt) && 'value' in opt) {
+                                        if (opt.value === 'all') {
+                                            setCategoryId('all');
+                                        } else {
+                                            setCategoryId(Number(opt.value));
+                                        }
+                                    } else {
+                                        setCategoryId('all');
+                                    }
+                                }}
+                                placeholder="Select category"
+                            />
+                        </div>
                     </div>
                     <DataTableWrapper
                         key={filter + '-' + categoryId}
                         ref={dtRef}
                         ajax={{
-                            url: route('article.json'),
+                            url: route('article.json') + `?filter=${filter}`,
                             type: 'POST',
                             data: (d: Record<string, unknown>) => ({
                                 ...d,
-                                category_id: categoryId || undefined,
+                                category_id: categoryId === 'all' ? undefined : categoryId,
                             }),
                         }}
                         columns={columns}
