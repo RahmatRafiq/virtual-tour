@@ -170,19 +170,20 @@ class ArticleController extends Controller
         try {
             $article->fill($validated)->save();
 
-            if ($request->has('cover')) {
+            if ($request->has('cover') && is_array($request->input('cover')) && count($request->input('cover')) > 0) {
                 $covers = $request->input('cover');
-                if (is_array($covers) && count($covers) > 0) {
-                    $last = end($covers);
+                $last   = end($covers);
+                $currentCover = $article->getMedia('cover')->first();
+                if (! $currentCover || $currentCover->file_name !== $last) {
                     $request->merge(['cover' => [$last]]);
+                    $article->clearMediaCollection('cover');
+                    MediaLibrary::put(
+                        $article,
+                        'cover',
+                        $request,
+                        'cover'
+                    );
                 }
-                $article->clearMediaCollection('cover');
-                MediaLibrary::put(
-                    $article,
-                    'cover',
-                    $request,
-                    'cover'
-                );
             }
 
             DB::commit();
