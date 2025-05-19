@@ -9,7 +9,12 @@ class Category extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'type'];
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
+    ];
     public function virtualTours(): HasMany
     {
         return $this->hasMany(VirtualTour::class);

@@ -16,7 +16,6 @@ class CategoryController extends Controller
             'all' => Category::withTrashed()->get(),
             default => Category::all(),
         };
-
         return Inertia::render('Category/Index', [
             'categories' => $categories,
             'filter'     => $filter,
@@ -38,7 +37,7 @@ class CategoryController extends Controller
             $query->where('name', 'like', "%{$search}%");
         }
 
-        $columns = ['id', 'name', 'created_at', 'updated_at'];
+        $columns = ['id', 'name', 'type', 'created_at', 'updated_at'];
         if ($request->filled('order')) {
             $orderColumn = $columns[$request->order[0]['column']] ?? 'id';
             $query->orderBy($orderColumn, $request->order[0]['dir']);
@@ -50,6 +49,7 @@ class CategoryController extends Controller
             return [
                 'id'         => $category->id,
                 'name'       => $category->name,
+                'type'       => $category->type,
                 'trashed'    => $category->trashed(),
                 'created_at' => $category->created_at->toDateTimeString(),
                 'updated_at' => $category->updated_at->toDateTimeString(),
@@ -72,9 +72,10 @@ class CategoryController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:categories,name',
+            'type' => 'required|string',
         ]);
 
-        Category::create($request->only('name'));
+        Category::create($request->only(['name', 'type']));
 
         return redirect()->route('category.index')->with('success', 'Category created successfully.');
     }
@@ -92,9 +93,10 @@ class CategoryController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'type' => 'required|string',
         ]);
 
-        $category->update($request->only('name'));
+        $category->update($request->only(['name', 'type']));
 
         return redirect()->route('category.index')->with('success', 'Category updated successfully.');
     }
