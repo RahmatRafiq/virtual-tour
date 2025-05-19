@@ -85,14 +85,22 @@ export default function ArticleFormPage() {
         dz.on('success', (_file, response: { name: string }) => {
             setData('cover', [response.name]);
         });
-        dz.on('removedfile', () => {
-            setData('cover', []);
+
+        dz.on('removedfile', (file: { name: string }) => {
+            setData('cover',
+                (data.cover as string[]).filter((name: string) => name !== file.name)
+            );
+
+            fetch(route('storage.destroy'), {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': csrf, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: file.name }),
+            });
         });
 
         return () => {
             dz.destroy();
         };
-        // eslint-disable-next-line
     }, [csrf, article?.media]);
 
     return (
