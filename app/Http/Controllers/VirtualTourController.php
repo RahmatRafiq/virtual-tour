@@ -70,21 +70,20 @@ class VirtualTourController extends Controller
     }
     public function show(VirtualTour $virtualTour)
     {
-        
         $virtualTour->load([
             'category',
-            'spheres.hotspots.targetSphere', 
-            'spheres.hotspots.sphere',       
-            'spheres.media',                 
+            'spheres.hotspots.targetSphere',
+            'spheres.hotspots.sphere',
+            'spheres.media',
         ]);
 
         return Inertia::render('VirtualTour/Show', [
-            'virtualTour' => $virtualTour
+            'virtualTour' => $virtualTour,
         ]);
     }
     public function create()
     {
-        $categories = Category::all();
+        $categories = Category::where('type', 'virtual tour')->get();
 
         return Inertia::render('VirtualTour/Form', [
             'categories' => $categories,
@@ -107,9 +106,9 @@ class VirtualTourController extends Controller
 
     public function edit(VirtualTour $virtualTour)
     {
-        $virtualTour->load('category'); // <-- Tambah ini
+        $virtualTour->load('category');
 
-        $categories   = Category::all();
+        $categories   = Category::where('type', 'virtual tour')->get();
         $virtualTours = VirtualTour::all();
 
         return Inertia::render('VirtualTour/Form', [
