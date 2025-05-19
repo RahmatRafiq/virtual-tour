@@ -8,12 +8,14 @@ import { Label } from '@/components/ui/label';
 import { BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
 import { Category } from '@/types/category';
+import CustomSelect from '@/components/select';
 
 export default function CategoryForm({ category }: { category?: Category }) {
     const isEdit = !!category;
 
     const { data, setData, post, put, processing, errors } = useForm({
         name: category?.name || '',
+        type: category?.type || 'article',
     });
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -29,6 +31,11 @@ export default function CategoryForm({ category }: { category?: Category }) {
             post(route('category.store'));
         }
     };
+    const typeOptions = [
+        { value: 'article', label: 'Article' },
+        { value: 'virtual tour', label: 'Virtual Tour' },
+    ];
+    const selectedType = typeOptions.find(opt => opt.value === data.type) || null;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -64,6 +71,16 @@ export default function CategoryForm({ category }: { category?: Category }) {
                                     required
                                 />
                                 <InputError message={errors.name} />
+                            </div>
+                            <div>
+                                <Label htmlFor="type">Type</Label>
+                                <CustomSelect
+                                    id="type"
+                                    options={typeOptions}
+                                    value={selectedType}
+                                    placeholder="Select type"
+                                />
+                                <InputError message={errors.type} />
                             </div>
 
                             <div className="flex items-center space-x-4">
