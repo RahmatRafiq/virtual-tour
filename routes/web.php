@@ -61,6 +61,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('hotspot/{hotspot}/restore', [\App\Http\Controllers\HotspotController::class, 'restore'])->name('hotspot.restore');
     Route::delete('hotspot/{hotspot}/force-delete', [\App\Http\Controllers\HotspotController::class, 'forceDelete'])->name('hotspot.force-delete');
 
+    Route::post('article/json', [\App\Http\Controllers\ArticleController::class, 'json'])->name('article.json');
+    Route::resource('article', \App\Http\Controllers\ArticleController::class);
+    Route::get('article/trashed', [\App\Http\Controllers\ArticleController::class, 'trashed'])->name('article.trashed');
+    Route::post('article/{article}/restore', [\App\Http\Controllers\ArticleController::class, 'restore'])->name('article.restore');
+    Route::delete('article/{article}/force-delete', [\App\Http\Controllers\ArticleController::class, 'forceDelete'])->name('article.force-delete');
+
     Route::post('logout', [SocialAuthController::class, 'logout'])->name('logout');
 
 });

@@ -74,17 +74,23 @@ return [
             'visibility' => 'public',
         ],
 
-        'sphere_file' => [
+        'sphere_file'    => [
             'driver'     => 'local',
             'root'       => storage_path('app/public/sphere_file'),
-            'url'        => env('APP_URL').'/storage/sphere_file',
+            'url'        => env('APP_URL') . '/storage/sphere_file',
             'visibility' => 'public',
         ],
-    
-        'sphere_image' => [
+
+        'sphere_image'   => [
             'driver'     => 'local',
             'root'       => storage_path('app/public/sphere_image'),
-            'url'        => env('APP_URL').'/storage/sphere_image',
+            'url'        => env('APP_URL') . '/storage/sphere_image',
+            'visibility' => 'public',
+        ],
+        'cover'          => [
+            'driver'     => 'local',
+            'root'       => storage_path('app/public/cover'),
+            'url'        => env('APP_URL') . '/storage/cover',
             'visibility' => 'public',
         ],
 
