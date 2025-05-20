@@ -4,23 +4,7 @@ import { TourCard } from '../TourCard'
 import { Category } from '@/types/category'
 import { Header } from '../Header'
 import { Footer } from '../Footer'
-
-
-type VirtualTourPreview = {
-    id: number
-    name: string
-    description: string
-    category: string
-    previewImage: string | null
-    sphereCount: number
-}
-
-type Pagination = {
-    current_page: number
-    last_page: number
-    per_page: number
-    total: number
-}
+import { Pagination, VirtualTourPreview } from '@/types/Content'
 
 interface AllProps {
     virtualTours: VirtualTourPreview[]
