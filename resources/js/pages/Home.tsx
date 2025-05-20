@@ -10,6 +10,7 @@ import { TourCard } from './Home/TourCard'
 import { Header } from './Home/Header'
 import { HeroSection } from './Home/HeroSection'
 import { Section } from './Home/Section'
+import { Footer } from './Home/Footer'
 
 
 export default function Home({ hero, articles, virtualTours }: HomeProps) {
@@ -62,6 +63,7 @@ export default function Home({ hero, articles, virtualTours }: HomeProps) {
           </div>
         </section>
       </main>
+      <Footer />
     </Tooltip.Provider>
   )
 }
