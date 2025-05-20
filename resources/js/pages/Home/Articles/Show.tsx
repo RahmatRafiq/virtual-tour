@@ -32,23 +32,47 @@ export default function Show({ article }: ArticleShowProps) {
 
     return (
         <>
-         <Header />
+            <Header />
             <Head title={article.title} />
             <div className="max-w-3xl mx-auto py-12 px-4">
-                <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
-                <div className="mb-4 text-gray-500">{article.category}</div>
-                <img src={imageUrl} alt={article.title} className="mb-6 rounded" />
-                <div className="prose mb-6" dangerouslySetInnerHTML={{ __html: article.content }} />
-                <div className="flex gap-2 flex-wrap">
+                <div className="relative mb-8 rounded-2xl overflow-hidden shadow-lg bg-gray-100">
+                    <div className="w-full aspect-video bg-gray-200">
+                        <img
+                            src={imageUrl}
+                            alt={article.title}
+                            className="w-full h-full object-contain object-center transition-all duration-300"
+                        />
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                        <div className="flex gap-2 flex-wrap">
+                            {tags.map((tag) => (
+                                <span key={tag} className="px-3 py-1 text-xs bg-blue-600/80 text-white rounded-full shadow">
+                                    #{tag}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-blue-700 font-semibold uppercase tracking-wide">{article.category}</span>
+                    <Link
+                        href="/"
+                        className="text-xs text-gray-400 hover:text-blue-600 transition"
+                    >
+                        ← Back to Home
+                    </Link>
+                </div>
+                <h1 className="text-4xl font-extrabold mb-6 text-gray-900 leading-tight">{article.title}</h1>
+                <article className="prose prose-lg max-w-none mb-10">
+                    <div dangerouslySetInnerHTML={{ __html: article.content }} />
+                </article>
+                <div className="flex gap-2 flex-wrap mt-8 md:hidden">
                     {tags.map((tag) => (
                         <span key={tag} className="px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
                             #{tag}
                         </span>
                     ))}
                 </div>
-                <Link href="/" className="inline-block mt-8 text-blue-600 hover:underline">
-                    ← Back to Home
-                </Link>
             </div>
         </>
     )

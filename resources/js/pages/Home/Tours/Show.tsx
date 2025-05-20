@@ -89,23 +89,51 @@ export default function Show({ tour }: TourShowProps) {
 
   return (
     <>
-         <Header />
+      <Header />
       <Head title={tour.name} />
       <div className="max-w-4xl mx-auto py-12 px-4">
-        <h1 className="text-3xl font-bold mb-2">{tour.name}</h1>
-        <div className="mb-4 text-gray-500">{tour.category?.name}</div>
-        <p className="mb-6">{tour.description}</p>
+        <div className="mb-8">
+          <h1 className="text-4xl font-extrabold mb-2 text-gray-900">{tour.name}</h1>
+          <div className="flex items-center gap-4 mb-2">
+            <span className="text-sm text-blue-700 font-semibold uppercase tracking-wide">{tour.category?.name}</span>
+            <span className="text-xs text-gray-400">{tour.spheres.length} Sphere{tour.spheres.length > 1 ? 's' : ''}</span>
+          </div>
+          <p className="text-gray-600">{tour.description}</p>
+        </div>
         {sphere ? (
-          <div className="border rounded-lg p-4">
-            <h2 className="text-xl font-semibold mb-2">{sphere.name}</h2>
-            <div ref={containerRef} style={{ width: '100%', height: 400 }} />
-            <div className="mt-4">
-              <strong>Hotspots:</strong>
-              <ul className="list-disc ml-6">
+          <div className="border rounded-2xl shadow-lg bg-gray-50 overflow-hidden mb-8">
+            <div className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-blue-50 to-blue-100 border-b">
+              <h2 className="text-lg font-semibold text-blue-900">{sphere.name}</h2>
+              <div className="flex gap-2">
+                {tour.spheres.map((s, idx) => (
+                  <button
+                    key={s.id}
+                    onClick={() => setCurrentIndex(idx)}
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                      idx === currentIndex
+                        ? 'bg-blue-600 text-white shadow'
+                        : 'bg-gray-200 text-gray-700 hover:bg-blue-100'
+                    }`}
+                  >
+                    {s.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div ref={containerRef} style={{ width: '100%', height: 420 }} className="bg-black" />
+            <div className="px-6 py-4">
+              <strong className="block mb-2 text-gray-700">Hotspots:</strong>
+              <ul className="list-disc ml-6 text-gray-800">
+                {sphere.hotspots.length === 0 && (
+                  <li className="text-gray-400 italic">No hotspots.</li>
+                )}
                 {sphere.hotspots.map((h) => (
                   <li key={h.id}>
-                    {h.type} - {h.tooltip}{' '}
-                    {h.target_sphere && `(Target: ${h.target_sphere.name})`}
+                    <span className="font-semibold">{h.type}</span>
+                    {h.tooltip && <> – <span>{h.tooltip}</span></>}
+                    {h.target_sphere && (
+                      <span className="ml-2 text-xs text-blue-700">(Target: {h.target_sphere.name})</span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -114,6 +142,7 @@ export default function Show({ tour }: TourShowProps) {
         ) : (
           <div className="text-gray-500">No sphere available.</div>
         )}
+
         <Link href="/" className="inline-block mt-8 text-blue-600 hover:underline">
           ← Back to Home
         </Link>
