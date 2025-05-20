@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RolePermissionSeeder::class,
             UserSeeder::class,
+            ArticleSeeder::class,
+            VirtualTourSeeder::class,
         ]);
     }
 }
