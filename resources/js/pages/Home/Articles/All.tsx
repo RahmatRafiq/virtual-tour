@@ -1,34 +1,33 @@
-import React from 'react'
 import { Head, Link, router } from '@inertiajs/react'
-import { TourCard } from '../TourCard'
-import { Category } from '@/types/category'
+import { ArticleCard } from '../ArticleCard'
 import { Header } from '../Header'
 import { Footer } from '../Footer'
-import { Pagination, VirtualTourPreview } from '@/types/Content'
+import * as Tooltip from '@radix-ui/react-tooltip'
+import { Category } from '@/types/Article'
+import { ArticlePreview, Pagination } from '@/types/Content'
+
 
 interface AllProps {
-    virtualTours: VirtualTourPreview[]
+    articles: ArticlePreview[]
     categories: Category[]
     activeCategory?: string | null
     pagination: Pagination
 }
 
-export default function All({ virtualTours, categories, activeCategory, pagination }: AllProps) {
+export default function All({ articles, categories, activeCategory, pagination }: AllProps) {
     return (
-
-        <>
+        <Tooltip.Provider>
             <Header />
             <div className="max-w-6xl mx-auto py-12 px-4">
-
-                <Head title="All Virtual Tours" />
-                <h1 className="text-3xl font-bold mb-6">All Virtual Tours</h1>
+                <Head title="All Articles" />
+                <h1 className="text-3xl font-bold mb-6">All Articles</h1>
                 <div className="mb-8 flex gap-2 flex-wrap">
                     <button
                         className={`px-4 py-2 rounded-full transition-colors ${!activeCategory
                             ? 'bg-indigo-600 text-white dark:bg-indigo-500 dark:text-white'
                             : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                             }`}
-                        onClick={() => router.get('/tours')}
+                        onClick={() => router.get('/articles')}
                     >
                         All
                     </button>
@@ -39,18 +38,24 @@ export default function All({ virtualTours, categories, activeCategory, paginati
                                 ? 'bg-indigo-600 text-white dark:bg-indigo-500 dark:text-white'
                                 : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                                 }`}
-                            onClick={() => router.get('/tours', { category: cat.name })}
+                            onClick={() => router.get('/articles', { category: cat.name })}
                         >
                             {cat.name}
                         </button>
                     ))}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {virtualTours.length === 0 && (
-                        <div className="col-span-full text-gray-500">No tours found.</div>
+                    {articles.length === 0 && (
+                        <div className="col-span-full text-gray-500">No articles found.</div>
                     )}
-                    {virtualTours.map(tour => (
-                        <TourCard key={tour.id} tour={tour} />
+                    {articles.map(article => (
+                        <ArticleCard
+                            key={article.id}
+                            article={{
+                                ...article,
+                                tags: Array.isArray(article.tags) ? article.tags : [],
+                            }}
+                        />
                     ))}
                 </div>
                 {/* Pagination */}
@@ -59,7 +64,7 @@ export default function All({ virtualTours, categories, activeCategory, paginati
                         <button
                             key={i + 1}
                             className={`px-3 py-1 rounded ${pagination.current_page === i + 1 ? 'bg-indigo-600 text-white' : 'bg-gray-200'}`}
-                            onClick={() => router.get('/tours', { page: i + 1, ...(activeCategory ? { category: activeCategory } : {}) })}
+                            onClick={() => router.get('/articles', { page: i + 1, ...(activeCategory ? { category: activeCategory } : {}) })}
                         >
                             {i + 1}
                         </button>
@@ -70,7 +75,6 @@ export default function All({ virtualTours, categories, activeCategory, paginati
                 </div>
             </div>
             <Footer />
-        </>
-
+        </Tooltip.Provider>
     )
 }

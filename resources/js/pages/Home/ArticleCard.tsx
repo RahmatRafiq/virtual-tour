@@ -2,6 +2,7 @@ import React from 'react'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import * as HoverCard from '@radix-ui/react-hover-card'
 import type { ArticlePreview } from '@/types/Home'
+import { Link } from '@inertiajs/react'
 
 interface Props {
     article: ArticlePreview
@@ -11,7 +12,7 @@ export function ArticleCard({ article }: Props) {
     return (
         <HoverCard.Root openDelay={200}>
             <HoverCard.Trigger asChild>
-                <a
+                <Link
                     href={`/articles/${article.slug}`}
                     className="group relative flex flex-col bg-white dark:bg-gray-900 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden border border-gray-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 h-full"
                 >
@@ -54,7 +55,7 @@ export function ArticleCard({ article }: Props) {
                         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{article.category}</p>
                         <div className="mt-2 text-gray-700 dark:text-gray-300 text-sm line-clamp-3">{article.excerpt}</div>
                     </div>
-                </a>
+                </Link>
             </HoverCard.Trigger>
 
             <HoverCard.Content

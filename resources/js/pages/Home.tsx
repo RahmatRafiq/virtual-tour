@@ -24,24 +24,7 @@ export default function Home({ hero, articles, virtualTours }: HomeProps) {
 
         <div className="max-w-6xl mx-auto px-4">
           <NavigationMenu.Root>
-            <NavigationMenu.List className="flex space-x-8 border-b pb-2 mb-12">
-              <NavigationMenu.Item>
-                <NavigationMenu.Link
-                  href="#articles"
-                  className="text-lg font-medium hover:text-blue-600 transition"
-                >
-                  Articles
-                </NavigationMenu.Link>
-              </NavigationMenu.Item>
-              <NavigationMenu.Item>
-                <NavigationMenu.Link
-                  href="/tours"
-                  className="text-lg font-medium hover:text-blue-600 transition"
-                >
-                  Tours
-                </NavigationMenu.Link>
-              </NavigationMenu.Item>
-            </NavigationMenu.List>
+
           </NavigationMenu.Root>
         </div>
 
