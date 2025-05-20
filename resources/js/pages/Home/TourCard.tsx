@@ -1,6 +1,7 @@
 import React from 'react'
 import * as HoverCard from '@radix-ui/react-hover-card'
 import type { VirtualTourPreview } from '@/types/Home'
+import { Link } from '@inertiajs/react'
 
 interface Props {
   tour: VirtualTourPreview
@@ -10,7 +11,7 @@ export function TourCard({ tour }: Props) {
   return (
     <HoverCard.Root openDelay={200}>
       <HoverCard.Trigger asChild>
-        <a
+        <Link
           href={`/tours/${tour.id}`}
           className="relative block bg-white dark:bg-gray-900 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden border border-gray-100 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-500"
         >
@@ -29,7 +30,7 @@ export function TourCard({ tour }: Props) {
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{tour.name}</h3>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{tour.category}</p>
           </div>
-        </a>
+        </Link>
       </HoverCard.Trigger>
 
       <HoverCard.Content
