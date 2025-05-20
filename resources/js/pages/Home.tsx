@@ -6,10 +6,10 @@ import type { HomeProps } from '@/types/Home'
 import * as NavigationMenu from '@radix-ui/react-navigation-menu'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { ArticleCard } from './Home/ArticleCard'
-import { Section } from './Home/Section'
 import { TourCard } from './Home/TourCard'
 import { Header } from './Home/Header'
 import { HeroSection } from './Home/HeroSection'
+import { Section } from './Home/Section'
 
 
 export default function Home({ hero, articles, virtualTours }: HomeProps) {
@@ -44,21 +44,23 @@ export default function Home({ hero, articles, virtualTours }: HomeProps) {
           </NavigationMenu.Root>
         </div>
 
-        <Section id="articles" title="Latest Articles">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {articles.map((a) => (
-              <ArticleCard key={a.id} article={a} />
+        <section id="articles" className="container mx-auto px-4">
+          <Section title="Latest Articles" href="/articles" />
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {articles.map((article) => (
+              <ArticleCard key={article.id} article={article} />
             ))}
           </div>
-        </Section>
+        </section>
 
-        <Section id="tours" title="Featured Virtual Tours">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {virtualTours.map((t) => (
-              <TourCard key={t.id} tour={t} />
+        <section id="tours" className="container mx-auto px-4">
+          <Section title="Virtual Tours" href="/tours" />
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {virtualTours.map((tour) => (
+              <TourCard key={tour.id} tour={tour} />
             ))}
           </div>
-        </Section>
+        </section>
       </main>
     </Tooltip.Provider>
   )
