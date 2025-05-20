@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\VirtualTour;
+use Illuminate\Container\Attributes\Tag;
 use Inertia\Inertia;
 use Str;
 
@@ -110,7 +111,7 @@ class HomeController extends Controller
         $virtualTours = $tours->map(fn($vt) => [
             'id'           => $vt->id,
             'name'         => $vt->name,
-            'description'  => \Str::limit($vt->description, 120),
+            'description'  => Str::limit($vt->description, 120),
             'category'     => $vt->category->name,
             'categoryName' => $vt->category->name,
             'previewImage' => optional($vt->spheres->first())->getFirstMediaUrl('sphere_image') ?: null,
@@ -126,6 +127,42 @@ class HomeController extends Controller
                 'last_page'    => $tours->lastPage(),
                 'per_page'     => $tours->perPage(),
                 'total'        => $tours->total(),
+            ],
+        ]);
+    }
+    public function allArticles()
+    {
+        $category = request('category');
+
+        $query = Article::with(['category', 'media']);
+
+        if ($category) {
+            $query->whereHas('category', fn($q) => $q->where('name', $category));
+        }
+
+        $articles = $query->latest('created_at')->paginate(12);
+
+        $categories = Category::where('type', 'article')->get(['id', 'name']);
+
+        $articleList = $articles->map(fn($a) => [
+            'id'         => $a->id,
+            'title'      => $a->title,
+            'slug'       => $a->slug,
+            'tags'       => is_array($a->tags) ? $a->tags : (json_decode($a->tags, true) ?? []),
+            'excerpt'    => Str::limit(strip_tags($a->content), 100),
+            'category'   => $a->category->name,
+            'coverImage' => $a->getFirstMediaUrl('cover') ?: null,
+        ]);
+
+        return Inertia::render('Home/Articles/All', [
+            'articles'       => $articleList,
+            'categories'     => $categories,
+            'activeCategory' => $category,
+            'pagination'     => [
+                'current_page' => $articles->currentPage(),
+                'last_page'    => $articles->lastPage(),
+                'per_page'     => $articles->perPage(),
+                'total'        => $articles->total(),
             ],
         ]);
     }
