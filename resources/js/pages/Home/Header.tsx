@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link, usePage } from '@inertiajs/react'
 import type { User } from '@/types/UserRolePermission'
+import AppearanceToggleDropdown from '@/components/appearance-dropdown' // pastikan path sesuai
 
 export function Header() {
     const { auth } = usePage<{ auth: { user: User | null } }>().props
@@ -8,14 +9,13 @@ export function Header() {
     return (
         <header className="sticky top-0 z-30 bg-white/80 dark:bg-[#18181b]/80 backdrop-blur border-b border-gray-100 dark:border-gray-800 mb-8">
             <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-                {/* Logo / Brand */}
                 <Link
                     href="/"
                     className="flex items-center gap-2 font-bold text-xl text-indigo-700 dark:text-indigo-300 hover:opacity-80 transition"
                 >
-                    {/* Bisa ganti dengan <img src="/logo.png" ... /> jika ada logo */}
                     <span>VirtualTour</span>
                 </Link>
+                <AppearanceToggleDropdown className="mx-2" />
                 <div className="flex items-center gap-4">
                     {auth.user ? (
                         <Link

@@ -11,26 +11,25 @@ export function TourCard({ tour }: Props) {
         <HoverCard.Root openDelay={200}>
             <HoverCard.Trigger asChild>
                 <a
-                    href={`/tours/${tour.id}`}
-                    className="relative block bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden border border-gray-100 hover:border-indigo-300"
-                >
-                    <div className="relative h-48">
-                        <img
-                            src={tour.previewImage ?? `https://picsum.photos/seed/tour-${tour.id}/400/300`}
-
-                            alt={tour.name}
-                            className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                        <span className="absolute bottom-4 left-4 bg-indigo-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                            {tour.sphereCount} sphere{tour.sphereCount !== 1 && 's'}
-                        </span>
-                    </div>
-                    <div className="p-6">
-                        <h3 className="text-xl font-semibold text-gray-900">{tour.name}</h3>
-                        <p className="mt-1 text-sm text-gray-500">{tour.category}</p>
-                    </div>
-                </a>
+  href={`/tours/${tour.id}`}
+  className="relative block bg-white dark:bg-gray-900 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden border border-gray-100 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-500"
+>
+  <div className="relative h-48">
+    <img
+      src={tour.previewImage ?? `https://picsum.photos/seed/tour-${tour.id}/400/300`}
+      alt={tour.name}
+      className="w-full h-full object-cover"
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+    <span className="absolute bottom-4 left-4 bg-indigo-600 dark:bg-indigo-400 text-white dark:text-gray-900 text-xs font-semibold px-3 py-1 rounded-full">
+      {tour.sphereCount} sphere{tour.sphereCount !== 1 && 's'}
+    </span>
+  </div>
+  <div className="p-6">
+    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{tour.name}</h3>
+    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{tour.category}</p>
+  </div>
+</a>
             </HoverCard.Trigger>
 
             <HoverCard.Content
