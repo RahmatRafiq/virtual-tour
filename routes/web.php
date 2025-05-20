@@ -5,9 +5,9 @@ use App\Http\Controllers\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-
 Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/tours', [\App\Http\Controllers\HomeController::class, 'allVirtualTours'])->name('tours');
+Route::get('/articles', [\App\Http\Controllers\HomeController::class, 'allArticles'])->name('articles');
 Route::get('/articles/{article:slug}', [\App\Http\Controllers\HomeController::class, 'showArticle'])->name('articles.show');
 Route::get('/tours/{virtualTour}', [\App\Http\Controllers\HomeController::class, 'showVirtualTour'])->name('tours.show');
 
