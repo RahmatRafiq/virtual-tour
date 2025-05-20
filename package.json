@@ -58,6 +58,7 @@
         "datatables.net-dt": "^2.2.2",
         "datatables.net-react": "^1.0.0",
         "dropzone": "^6.0.0-beta.2",
+        "framer-motion": "^12.12.1",
         "globals": "^15.14.0",
         "laravel-vite-plugin": "^1.0",
         "lucide-react": "^0.475.0",
