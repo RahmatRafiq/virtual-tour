@@ -26,6 +26,7 @@ export interface Sphere {
 export type VirtualTour = {
   id: number;
   name: string;
+  category: { id: number; name: string };
   description: string;
   spheres: Sphere[];
 };

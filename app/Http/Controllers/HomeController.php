@@ -74,30 +74,17 @@ class HomeController extends Controller
         ]);
     }
 
-    public function showVirtualTour(VirtualTour $virtualTour)
-    {
-        $virtualTour->load(['category', 'spheres.hotspots', 'spheres.media']);
+public function showVirtualTour(VirtualTour $virtualTour)
+{
+    $virtualTour->load([
+        'category',
+        'spheres.media',
+        'spheres.hotspots.targetSphere',
+        'spheres.hotspots.sphere',
+    ]);
 
-        $spheres = $virtualTour->spheres->map(fn($s) => [
-            'id'       => $s->id,
-            'name'     => $s->name,
-            'panorama' => $s->panorama_url,
-            'hotspots' => $s->hotspots->map(fn($h) => [
-                'id'       => $h->id,
-                'type'     => $h->type,
-                'tooltip'  => $h->tooltip,
-                'targetId' => $h->target_sphere_id,
-            ]),
-        ]);
-
-        return Inertia::render('Home/Tours/Show', [
-            'tour' => [
-                'id'          => $virtualTour->id,
-                'name'        => $virtualTour->name,
-                'description' => $virtualTour->description,
-                'category'    => $virtualTour->category->name,
-                'spheres'     => $spheres,
-            ],
-        ]);
-    }
+    return Inertia::render('Home/Tours/Show', [
+        'tour' => $virtualTour->toArray(),
+    ]);
+}
 }
