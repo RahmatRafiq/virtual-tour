@@ -2,7 +2,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
-use App\Models\Sphere;
 use App\Models\VirtualTour;
 use Inertia\Inertia;
 use Str;
@@ -35,9 +34,9 @@ class HomeController extends Controller
             ]);
 
         $tours = VirtualTour::with([
-                'category',
-                'spheres' => fn($q) => $q->orderBy('id')->limit(1)->with('media'),
-            ])
+            'category',
+            'spheres' => fn($q) => $q->orderBy('id')->limit(1)->with('media'),
+        ])
             ->withCount('spheres')
             ->oldest('created_at')
             ->take(5)
@@ -63,14 +62,14 @@ class HomeController extends Controller
     {
         $article->load('category');
 
-        return Inertia::render('Articles/Show', [
+        return Inertia::render('Home/Articles/Show', [
             'article' => [
                 'id'       => $article->id,
                 'title'    => $article->title,
                 'content'  => $article->content,
                 'category' => $article->category->name,
                 'tags'     => $article->tags,
-                'media'    => $article->getFirstMediaUrl('default'),
+                'media'    => $article->getFirstMediaUrl('cover') ?: null, // GANTI 'default' JADI 'cover'
             ],
         ]);
     }
@@ -91,7 +90,7 @@ class HomeController extends Controller
             ]),
         ]);
 
-        return Inertia::render('Tours/Show', [
+        return Inertia::render('Home/Tours/Show', [
             'tour' => [
                 'id'          => $virtualTour->id,
                 'name'        => $virtualTour->name,
