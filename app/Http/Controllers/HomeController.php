@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\Category;
 use App\Models\VirtualTour;
 use Inertia\Inertia;
 use Str;
@@ -74,17 +75,59 @@ class HomeController extends Controller
         ]);
     }
 
-public function showVirtualTour(VirtualTour $virtualTour)
-{
-    $virtualTour->load([
-        'category',
-        'spheres.media',
-        'spheres.hotspots.targetSphere',
-        'spheres.hotspots.sphere',
-    ]);
+    public function showVirtualTour(VirtualTour $virtualTour)
+    {
+        $virtualTour->load([
+            'category',
+            'spheres.media',
+            'spheres.hotspots.targetSphere',
+            'spheres.hotspots.sphere',
+        ]);
 
-    return Inertia::render('Home/Tours/Show', [
-        'tour' => $virtualTour->toArray(),
-    ]);
-}
+        return Inertia::render('Home/Tours/Show', [
+            'tour' => $virtualTour->toArray(),
+        ]);
+    }
+
+    public function allVirtualTours()
+    {
+        $category = request('category');
+
+        $query = VirtualTour::with([
+            'category',
+            'spheres' => fn($q) => $q->orderBy('id')->limit(1)->with('media'),
+        ])
+            ->withCount('spheres');
+
+        if ($category) {
+            $query->whereHas('category', fn($q) => $q->where('name', $category));
+        }
+
+        $tours = $query->latest('created_at')->paginate(12);
+
+        $categories = Category::where('type', 'virtual tour')->get(['id', 'name']);
+
+        $virtualTours = $tours->map(fn($vt) => [
+            'id'           => $vt->id,
+            'name'         => $vt->name,
+            'description'  => \Str::limit($vt->description, 120),
+            'category'     => $vt->category->name,
+            'categoryName' => $vt->category->name,
+            'previewImage' => optional($vt->spheres->first())->getFirstMediaUrl('sphere_image') ?: null,
+            'sphereCount'  => $vt->spheres_count,
+        ]);
+
+        return Inertia::render('Home/Tours/All', [
+            'virtualTours'   => $virtualTours,
+            'categories'     => $categories,
+            'activeCategory' => $category,
+            'pagination'     => [
+                'current_page' => $tours->currentPage(),
+                'last_page'    => $tours->lastPage(),
+                'per_page'     => $tours->perPage(),
+                'total'        => $tours->total(),
+            ],
+        ]);
+    }
+
 }
