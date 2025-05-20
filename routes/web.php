@@ -5,9 +5,10 @@ use App\Http\Controllers\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
+
+Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/articles/{article:slug}', [\App\Http\Controllers\HomeController::class, 'showArticle'])->name('articles.show');
+Route::get('/tours/{virtualTour}', [\App\Http\Controllers\HomeController::class, 'showVirtualTour'])->name('tours.show');
 
 Route::get('auth/{provider}', [SocialAuthController::class, 'redirectToProvider'])->name('auth.redirect');
 Route::get('auth/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback'])->name('auth.callback');
