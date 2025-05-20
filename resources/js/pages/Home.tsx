@@ -26,8 +26,8 @@ export default function Home({ hero, articles, virtualTours }: HomeProps) {
           <NavigationMenu.Root>
             <NavigationMenu.List className="flex space-x-8 border-b pb-2 mb-12">
               <NavigationMenu.Item>
-                <NavigationMenu.Link
-                  href="#articles"
+                  <NavigationMenu.Link
+                  href="/articles"
                   className="text-lg font-medium hover:text-blue-600 transition"
                 >
                   Articles
