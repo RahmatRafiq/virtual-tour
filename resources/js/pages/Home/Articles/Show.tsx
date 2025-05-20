@@ -29,7 +29,7 @@ export default function Show({ article }: ArticleShowProps) {
     // Fallback gambar jika media kosong/null
     const imageUrl = article.media && article.media !== ''
         ? article.media
-        : '/images/placeholder-article.png'
+        : `https://picsum.photos/seed/article-${article.id}/400/300`
 
     return (
         <>
