@@ -7,6 +7,7 @@ import '@photo-sphere-viewer/core/index.css'
 import '@photo-sphere-viewer/markers-plugin/index.css'
 import HotspotMarker from '@/components/HotspotMarker'
 import type { MarkersPluginWithEvents, VirtualTour } from '@/types/SphereView'
+import { Header } from '../Header'
 
 interface TourShowProps {
   tour: VirtualTour
@@ -88,6 +89,7 @@ export default function Show({ tour }: TourShowProps) {
 
   return (
     <>
+         <Header />
       <Head title={tour.name} />
       <div className="max-w-4xl mx-auto py-12 px-4">
         <h1 className="text-3xl font-bold mb-2">{tour.name}</h1>

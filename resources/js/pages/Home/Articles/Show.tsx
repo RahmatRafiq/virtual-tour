@@ -1,5 +1,6 @@
 import React from 'react'
 import { Head, Link } from '@inertiajs/react'
+import { Header } from '../Header'
 
 interface ArticleShowProps {
     article: {
@@ -31,6 +32,7 @@ export default function Show({ article }: ArticleShowProps) {
 
     return (
         <>
+         <Header />
             <Head title={article.title} />
             <div className="max-w-3xl mx-auto py-12 px-4">
                 <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
