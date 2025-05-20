@@ -23,7 +23,10 @@ export default function All({ articles, categories, activeCategory, pagination }
                 <h1 className="text-3xl font-bold mb-6">All Articles</h1>
                 <div className="mb-8 flex gap-2 flex-wrap">
                     <button
-                        className={`px-4 py-2 rounded-full ${!activeCategory ? 'bg-indigo-600 text-white' : 'bg-gray-200'}`}
+                        className={`px-4 py-2 rounded-full transition-colors ${!activeCategory
+                            ? 'bg-indigo-600 text-white dark:bg-indigo-500 dark:text-white'
+                            : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                            }`}
                         onClick={() => router.get('/articles')}
                     >
                         All
@@ -31,7 +34,10 @@ export default function All({ articles, categories, activeCategory, pagination }
                     {categories.map(cat => (
                         <button
                             key={cat.id}
-                            className={`px-4 py-2 rounded-full ${activeCategory === cat.name ? 'bg-indigo-600 text-white' : 'bg-gray-200'}`}
+                            className={`px-4 py-2 rounded-full transition-colors ${activeCategory === cat.name
+                                ? 'bg-indigo-600 text-white dark:bg-indigo-500 dark:text-white'
+                                : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                                }`}
                             onClick={() => router.get('/articles', { category: cat.name })}
                         >
                             {cat.name}
