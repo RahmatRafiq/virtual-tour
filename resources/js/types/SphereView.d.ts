@@ -5,6 +5,7 @@ export type Hotspot = {
   pitch: number;
   tooltip: string | null;
   content: string | null;
+  target_sphere_id: number | null;
   target_sphere: { id: number; name: string } | null;
   sphere?: {
     id: number;
@@ -33,8 +34,8 @@ export type VirtualTour = {
 
 export type ClickEvent = {
   position?: {
-      yaw: number;
-      pitch: number;
+    yaw: number;
+    pitch: number;
   };
 };
 

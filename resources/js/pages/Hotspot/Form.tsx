@@ -60,8 +60,8 @@ export default function HotspotFormPage() {
         pitch: hotspot?.pitch || 0,
         tooltip: hotspot?.tooltip || '',
         content: hotspot?.content || '',
+        target_sphere_id: hotspot?.target_sphere_id || null,
     });
-
     useEffect(() => {
         if (
             virtualTourId &&
@@ -106,6 +106,7 @@ export default function HotspotFormPage() {
                         tooltip: data.tooltip || 'This is a custom marker!',
                         content: data.content || 'This is the content of the marker.',
                         target_sphere: null,
+                        target_sphere_id: null,
                         sphere: sphere,
                     }}
                 />
@@ -226,7 +227,31 @@ export default function HotspotFormPage() {
                             />
                             <InputError message={errors.sphere_id} />
                         </div>
-
+                        <div className="grid gap-2">
+                            <Label htmlFor="target_sphere_id">Target Sphere</Label>
+                            <CustomSelect
+                                id="target_sphere_id"
+                                isMulti={false}
+                                options={filteredSpheres.map((sphere) => ({
+                                    value: sphere.id,
+                                    label: sphere.name,
+                                }))}
+                                value={
+                                    filteredSpheres
+                                        .map((sphere) => ({
+                                            value: sphere.id,
+                                            label: sphere.name,
+                                        }))
+                                        .find((opt) => opt.value === data.target_sphere_id) || null
+                                }
+                                onChange={(selected) => {
+                                    setData('target_sphere_id', (selected as { value: number })?.value ?? null);
+                                }}
+                                isDisabled={!virtualTourId}
+                                placeholder="Pilih Target Sphere"
+                            />
+                            <InputError message={errors.target_sphere_id} />
+                        </div>
                         <div className="grid gap-2">
                             <Label>Sphere Viewer</Label>
                             <div
