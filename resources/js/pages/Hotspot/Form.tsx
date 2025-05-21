@@ -135,6 +135,12 @@ export default function HotspotFormPage() {
         return () => viewer.destroy();
     }, [data.sphere_id, spheres, data.yaw, data.pitch, data.content, data.tooltip, setData]);
 
+    useEffect(() => {
+        if (data.type === 'info' && data.target_sphere_id !== null) {
+            setData('target_sphere_id', null);
+        }
+    }, [data.type]);
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         if (isEdit) {
@@ -227,31 +233,33 @@ export default function HotspotFormPage() {
                             />
                             <InputError message={errors.sphere_id} />
                         </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="target_sphere_id">Target Sphere</Label>
-                            <CustomSelect
-                                id="target_sphere_id"
-                                isMulti={false}
-                                options={filteredSpheres.map((sphere) => ({
-                                    value: sphere.id,
-                                    label: sphere.name,
-                                }))}
-                                value={
-                                    filteredSpheres
-                                        .map((sphere) => ({
-                                            value: sphere.id,
-                                            label: sphere.name,
-                                        }))
-                                        .find((opt) => opt.value === data.target_sphere_id) || null
-                                }
-                                onChange={(selected) => {
-                                    setData('target_sphere_id', (selected as { value: number })?.value ?? null);
-                                }}
-                                isDisabled={!virtualTourId}
-                                placeholder="Pilih Target Sphere"
-                            />
-                            <InputError message={errors.target_sphere_id} />
-                        </div>
+                        {data.type !== 'info' && (
+                            <div className="grid gap-2">
+                                <Label htmlFor="target_sphere_id">Target Sphere</Label>
+                                <CustomSelect
+                                    id="target_sphere_id"
+                                    isMulti={false}
+                                    options={filteredSpheres.map((sphere) => ({
+                                        value: sphere.id,
+                                        label: sphere.name,
+                                    }))}
+                                    value={
+                                        filteredSpheres
+                                            .map((sphere) => ({
+                                                value: sphere.id,
+                                                label: sphere.name,
+                                            }))
+                                            .find((opt) => opt.value === data.target_sphere_id) || null
+                                    }
+                                    onChange={(selected) => {
+                                        setData('target_sphere_id', (selected as { value: number })?.value ?? null);
+                                    }}
+                                    isDisabled={!virtualTourId}
+                                    placeholder="Pilih Target Sphere"
+                                />
+                                <InputError message={errors.target_sphere_id} />
+                            </div>
+                        )}
                         <div className="grid gap-2">
                             <Label>Sphere Viewer</Label>
                             <div
