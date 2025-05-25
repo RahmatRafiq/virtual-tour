@@ -18,7 +18,7 @@ class StorageController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|max:2048',
+            'file' => 'required|file|max:20480',
         ]);
 
         // rename file with unique

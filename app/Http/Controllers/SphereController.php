@@ -23,14 +23,14 @@ class SphereController extends Controller
         return Inertia::render('Sphere/Index', [
             'spheres'      => $spheres,
             'filter'       => $filter,
-            'virtualTours' => VirtualTour::select('id', 'name')->get(), // Tambah ini
+            'virtualTours' => VirtualTour::select('id', 'name')->get(),
         ]);
     }
     public function json(Request $request)
     {
         $search        = $request->input('search.value', '');
         $filter        = $request->input('filter', 'active');
-        $virtualTourId = $request->input('virtual_tour_id'); // Tambah ini
+        $virtualTourId = $request->input('virtual_tour_id');
 
         $query = match ($filter) {
             'trashed' => Sphere::onlyTrashed()->with('virtualTour'),
@@ -60,7 +60,7 @@ class SphereController extends Controller
             'id'          => $sphere->id,
             'name'        => $sphere->name,
             'description' => $sphere->description,
-            'virtualTour' => optional($sphere->virtualTour)->name ?? '-', // <= Fix di sini
+            'virtualTour' => optional($sphere->virtualTour)->name ?? '-',
             'trashed'     => $sphere->trashed(),
             'actions'     => '',
         ]);
@@ -83,8 +83,10 @@ class SphereController extends Controller
             'name'            => 'required|string|max:255',
             'description'     => 'nullable|string',
             'initial_yaw'     => 'nullable|numeric',
-            'sphere_file'     => 'array|max:1',
-            'sphere_image'    => 'array|max:1',
+            'sphere_file'     => 'array',
+            'sphere_file.*'   => 'string|max:255',
+            'sphere_image'    => 'array',
+            'sphere_image.*'  => 'string|max:255',
         ]);
 
         DB::beginTransaction();
@@ -139,8 +141,10 @@ class SphereController extends Controller
             'name'            => 'required|string|max:255',
             'description'     => 'nullable|string',
             'initial_yaw'     => 'nullable|numeric',
-            'sphere_file'     => 'array|max:1',
-            'sphere_image'    => 'array|max:1',
+            'sphere_file'     => 'array',
+            'sphere_file.*'   => 'string|max:255',
+            'sphere_image'    => 'array',
+            'sphere_image.*'  => 'string|max:255',
         ]);
 
         DB::beginTransaction();
