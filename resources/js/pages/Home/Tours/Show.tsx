@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { Head, Link } from '@inertiajs/react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import SphereViewer from '@/components/SphereViewer'
@@ -25,6 +25,22 @@ export default function Show({ tour }: TourShowProps) {
   }
 
   const sphere = tour.spheres[currentIndex]
+
+  if (!sphere) {
+    return (
+      <>
+        <Header />
+        <Head title={tour.name} />
+        <div className="max-w-4xl mx-auto py-12 px-4">
+          <h1 className="text-2xl font-bold mb-4">Sphere not found</h1>
+          <Link href="/" className="text-blue-600 hover:underline">
+            ← Back to Home
+          </Link>
+        </div>
+        <Footer />
+      </>
+    )
+  }
 
   return (
     <>
@@ -53,8 +69,8 @@ export default function Show({ tour }: TourShowProps) {
                 key={s.id}
                 onClick={() => setCurrentIndex(idx)}
                 className={`inline-block px-4 py-1 mr-4 rounded-full text-xs font-medium ${idx === currentIndex
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 hover:bg-blue-100'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 hover:bg-blue-100'
                   }`}
               >
                 {s.name}
@@ -72,7 +88,10 @@ export default function Show({ tour }: TourShowProps) {
         <SphereViewer
           sphere={sphere}
           initialYaw={sphere.initial_yaw}
-          onNavigateSphere={setCurrentIndex}
+          onNavigateSphere={(targetId) => {
+            const idx = tour.spheres.findIndex(s => s.id === targetId)
+            if (idx !== -1) setCurrentIndex(idx)
+          }}
         />
 
         <div className="px-6 py-4">

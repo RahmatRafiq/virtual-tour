@@ -2,10 +2,12 @@ import React, { useRef, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Viewer, PluginConstructor } from '@photo-sphere-viewer/core'
 import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin'
+import { AutorotatePlugin } from '@photo-sphere-viewer/autorotate-plugin'
 import '@photo-sphere-viewer/core/index.css'
 import '@photo-sphere-viewer/markers-plugin/index.css'
 import HotspotMarker from '@/components/HotspotMarker'
 import type { MarkersPluginWithEvents, Sphere } from '@/types/SphereView'
+import { RotateCcw } from 'lucide-react'
 
 interface SphereViewerProps {
     sphere: Sphere
@@ -16,6 +18,7 @@ interface SphereViewerProps {
 export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere }: SphereViewerProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const viewerRef = useRef<Viewer | null>(null)
+    const autorotateRef = useRef<AutorotatePlugin | null>(null)
     const [autoRotate, setAutoRotate] = useState(false)
     const toRad = (deg: number) => (deg * Math.PI) / 180
 
@@ -25,11 +28,19 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
         const viewer = new Viewer({
             container: containerRef.current,
             panorama: sphere.media[0]?.original_url || '',
-            plugins: [[MarkersPlugin as unknown as PluginConstructor, {}]],
+            plugins: [
+                [MarkersPlugin as unknown as PluginConstructor, {}],
+                [AutorotatePlugin, { autostartDelay: null, autostartOnIdle: false, autorotatePitch: 0 }],
+            ],
         })
         viewerRef.current = viewer
 
-        const markers = viewer.getPlugin(MarkersPlugin as unknown as PluginConstructor) as unknown as MarkersPluginWithEvents
+        const markers = viewer.getPlugin(
+            MarkersPlugin as unknown as PluginConstructor
+        ) as unknown as MarkersPluginWithEvents
+
+        autorotateRef.current = viewer.getPlugin(AutorotatePlugin) as AutorotatePlugin
+
         markers.addEventListener('select-marker', e => {
             const id = parseInt(e.marker.id, 10)
             const hotspot = sphere.hotspots.find(h => h.id === id)
@@ -50,7 +61,10 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
         const viewer = viewerRef.current
         if (!viewer) return
 
-        const markers = viewer.getPlugin(MarkersPlugin as unknown as PluginConstructor) as unknown as MarkersPluginWithEvents
+        const markers = viewer.getPlugin(
+            MarkersPlugin as unknown as PluginConstructor
+        ) as unknown as MarkersPluginWithEvents
+
         viewer.setPanorama(sphere.media[0]?.original_url || '')
             .then(() => {
                 viewer.rotate({ yaw: toRad(initialYaw), pitch: 0 })
@@ -65,10 +79,14 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
                         anchor: 'center bottom',
                     })
                 })
-                if (autoRotate) {
-                    viewer.rotate({ yaw: toRad(initialYaw), pitch: 0 })
-                } else {
-                    viewer.stopAnimation()
+                if (autorotateRef.current) {
+                    if (autoRotate) {
+                        autorotateRef.current.start()
+                        // pastikan interaksi mouse tetap aktif
+                        viewer.setOptions({ mousemove: true, mousewheel: true })
+                    } else {
+                        autorotateRef.current.stop()
+                    }
                 }
             })
             .catch(console.error)
@@ -76,14 +94,6 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
 
     const handleToggleAutoRotate = () => {
         setAutoRotate(prev => !prev)
-        const viewer = viewerRef.current
-        if (viewer) {
-            if (!autoRotate) {
-                viewer.rotate({ yaw: toRad(initialYaw), pitch: 0 })
-            } else {
-                viewer.stopAnimation()
-            }
-        }
     }
 
     return (
@@ -94,9 +104,12 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
             />
             <button
                 onClick={handleToggleAutoRotate}
-                className="absolute top-2 right-2 bg-white/80 px-3 py-1 rounded shadow"
+                className="absolute top-3 right-3 flex items-center space-x-1 bg-white/80 px-3 py-1 rounded shadow"
             >
-                {autoRotate ? 'Matikan Auto Rotate' : 'Nyalakan Auto Rotate'}
+                <RotateCcw className="w-4 h-4" />
+                <span className="text-xs">
+                    {autoRotate ? 'Matikan Auto Rotate' : 'Nyalakan Auto Rotate'}
+                </span>
             </button>
         </div>
     )
