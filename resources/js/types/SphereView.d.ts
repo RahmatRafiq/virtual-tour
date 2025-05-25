@@ -18,6 +18,7 @@ export type Hotspot = {
 export interface Sphere {
   id: number;
   name: string;
+  initial_yaw: number;
   media: Array<{ original_url: string }>;
   sphere_file: string;
   sphere_image: string;
