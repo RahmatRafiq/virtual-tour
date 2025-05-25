@@ -7,7 +7,6 @@ import '@photo-sphere-viewer/core/index.css'
 import '@photo-sphere-viewer/markers-plugin/index.css'
 import HotspotMarker from '@/components/HotspotMarker'
 import type { MarkersPluginWithEvents, Sphere } from '@/types/SphereView'
-import { RotateCcw } from 'lucide-react'
 
 interface SphereViewerProps {
     sphere: Sphere
@@ -19,7 +18,7 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
     const containerRef = useRef<HTMLDivElement>(null)
     const viewerRef = useRef<Viewer | null>(null)
     const autorotateRef = useRef<AutorotatePlugin | null>(null)
-    const [autoRotate, setAutoRotate] = useState(false)
+    const [autoRotate] = useState(false)
     const toRad = (deg: number) => (deg * Math.PI) / 180
 
     useEffect(() => {
@@ -82,7 +81,6 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
                 if (autorotateRef.current) {
                     if (autoRotate) {
                         autorotateRef.current.start()
-                        // pastikan interaksi mouse tetap aktif
                         viewer.setOptions({ mousemove: true, mousewheel: true })
                     } else {
                         autorotateRef.current.stop()
@@ -92,25 +90,12 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
             .catch(console.error)
     }, [sphere, initialYaw, autoRotate])
 
-    const handleToggleAutoRotate = () => {
-        setAutoRotate(prev => !prev)
-    }
-
     return (
         <div className="relative">
             <div
                 ref={containerRef}
                 className="w-full h-[420px] md:h-[500px] bg-black rounded-lg overflow-hidden"
             />
-            <button
-                onClick={handleToggleAutoRotate}
-                className="absolute top-3 right-3 flex items-center space-x-1 bg-white/80 px-3 py-1 rounded shadow"
-            >
-                <RotateCcw className="w-4 h-4" />
-                <span className="text-xs">
-                    {autoRotate ? 'Matikan Auto Rotate' : 'Nyalakan Auto Rotate'}
-                </span>
-            </button>
         </div>
     )
 }
