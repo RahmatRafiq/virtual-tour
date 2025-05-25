@@ -23,7 +23,7 @@ class SphereController extends Controller
         return Inertia::render('Sphere/Index', [
             'spheres'      => $spheres,
             'filter'       => $filter,
-            'virtualTours' => VirtualTour::select('id', 'name')->get(),
+            'virtualTours' => VirtualTour::latest()->select('id', 'name')->get(),
         ]);
     }
     public function json(Request $request)
@@ -70,7 +70,7 @@ class SphereController extends Controller
     public function create()
     {
         return Inertia::render('Sphere/Form', [
-            'virtualTours' => VirtualTour::all(),
+            'virtualTours' => VirtualTour::latest()->get(),
             'sphere'       => null,
             'sphere_file'  => null,
             'sphere_image' => null,
@@ -127,7 +127,7 @@ class SphereController extends Controller
         $sphereFile  = $sphere->getMedia('sphere_file')->first();
 
         return Inertia::render('Sphere/Form', [
-            'virtualTours' => VirtualTour::all(),
+            'virtualTours' => VirtualTour::latest()->get(),
             'sphere'       => $sphere,
             'sphereImage'  => $sphereImage,
             'sphereFile'   => $sphereFile,
