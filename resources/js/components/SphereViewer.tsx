@@ -26,9 +26,6 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
             container: containerRef.current,
             panorama: sphere.media[0]?.original_url || '',
             plugins: [[MarkersPlugin as unknown as PluginConstructor, {}]],
-            // autorotateSpeed: '2rpm', // bisa diubah sesuai kebutuhan
-            // autorotateLat: 0,
-            // autorotate: autoRotate,
         })
         viewerRef.current = viewer
 
@@ -68,8 +65,6 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
                         anchor: 'center bottom',
                     })
                 })
-                // Set auto rotate sesuai state
-              
                 if (autoRotate) {
                     viewer.rotate({ yaw: toRad(initialYaw), pitch: 0 })
                 } else {
@@ -79,7 +74,6 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
             .catch(console.error)
     }, [sphere, initialYaw, autoRotate])
 
-    // Toggle auto rotate
     const handleToggleAutoRotate = () => {
         setAutoRotate(prev => !prev)
         const viewer = viewerRef.current
