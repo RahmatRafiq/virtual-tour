@@ -1,5 +1,5 @@
 import React from 'react';
-import { Info, ArrowRight } from 'lucide-react';
+import { Info, ArrowUp } from 'lucide-react';
 import { Hotspot } from '@/types/SphereView';
 
 
@@ -11,7 +11,7 @@ type Props = {
 export default function HotspotMarker({ hotspot }: Props) {
     const isInfo = hotspot.type === 'info';
     const borderColor = isInfo ? 'border-green-600' : 'border-blue-600';
-    const IconComponent = isInfo ? Info : ArrowRight;
+    const IconComponent = isInfo ? Info : ArrowUp;
     return (
         <div className="relative w-0 h-0 overflow-visible transform -translate-x-1/2 -translate-y-full">
             <div className="absolute left-1/2 top-full transform -translate-x-1/2 ">
