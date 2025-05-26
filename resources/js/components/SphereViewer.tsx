@@ -26,21 +26,41 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
     )?.original_url || sphere.media[0]?.original_url || ''
 
     useEffect(() => {
-        const container = containerRef.current
-        if (!container || !panoramaUrl) return
+        if (!containerRef.current || !panoramaUrl) return
 
         if (viewerRef.current) {
-            try {
-                viewerRef.current.destroy()
-            } catch (e) {
-                console.warn('Error saat destroy viewer:', e)
-            }
-            viewerRef.current = null
-            container.innerHTML = ''
+            const viewer = viewerRef.current
+            const markers = viewer.getPlugin(
+                MarkersPlugin as unknown as PluginConstructor
+            ) as unknown as MarkersPluginWithEvents
+
+            viewer.setPanorama(panoramaUrl).then(() => {
+                markers.clearMarkers()
+                sphere.hotspots.forEach(h => {
+                    const el = document.createElement('div')
+                    createRoot(el).render(<HotspotMarker hotspot={h} />)
+                    markers.addMarker({
+                        id: String(h.id),
+                        position: { yaw: toRad(h.yaw), pitch: toRad(h.pitch) },
+                        element: el,
+                        anchor: 'center bottom',
+                    })
+                })
+                if (autorotateRef.current) {
+                    if (autoRotate) {
+                        autorotateRef.current.start()
+                        viewer.setOptions({ mousemove: true, mousewheel: true })
+                    } else {
+                        autorotateRef.current.stop()
+                    }
+                }
+                viewer.rotate({ yaw: toRad(initialYaw), pitch: 0 })
+            })
+            return
         }
 
         const viewer = new Viewer({
-            container: containerRef.current as HTMLElement,
+            container: containerRef.current,
             panorama: panoramaUrl,
             plugins: [
                 [MarkersPlugin as unknown as PluginConstructor, {}],
@@ -66,7 +86,7 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
             }
         })
 
-        const onReady = () => {
+        viewer.addEventListener('ready', () => {
             markers.clearMarkers()
             sphere.hotspots.forEach(h => {
                 const el = document.createElement('div')
@@ -87,9 +107,8 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
                 }
             }
             viewer.rotate({ yaw: toRad(initialYaw), pitch: 0 })
-            viewer.removeEventListener('ready', onReady)
-        }
-        viewer.addEventListener('ready', onReady)
+        })
+
         return () => {
             if (viewerRef.current) {
                 try {
@@ -98,9 +117,6 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
                     console.warn('Error saat destroy viewer:', e)
                 }
                 viewerRef.current = null
-            }
-            if (container) {
-                container.innerHTML = ''
             }
         }
     }, [sphere, onNavigateSphere, panoramaUrl, initialYaw, autoRotate])
