@@ -26,7 +26,8 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
     )?.original_url || sphere.media[0]?.original_url || ''
 
     useEffect(() => {
-        if (!containerRef.current || !panoramaUrl) return
+        const container = containerRef.current
+        if (!container || !panoramaUrl) return
 
         if (viewerRef.current) {
             try {
@@ -35,11 +36,11 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
                 console.warn('Error saat destroy viewer:', e)
             }
             viewerRef.current = null
-            containerRef.current.innerHTML = ''
+            container.innerHTML = ''
         }
 
         const viewer = new Viewer({
-            container: containerRef.current,
+            container: containerRef.current as HTMLElement,
             panorama: panoramaUrl,
             plugins: [
                 [MarkersPlugin as unknown as PluginConstructor, {}],
@@ -89,7 +90,6 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
             viewer.removeEventListener('ready', onReady)
         }
         viewer.addEventListener('ready', onReady)
-
         return () => {
             if (viewerRef.current) {
                 try {
@@ -99,8 +99,8 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
                 }
                 viewerRef.current = null
             }
-            if (containerRef.current) {
-                containerRef.current.innerHTML = ''
+            if (container) {
+                container.innerHTML = ''
             }
         }
     }, [sphere, onNavigateSphere, panoramaUrl, initialYaw, autoRotate])
