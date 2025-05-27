@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { Head, Link } from '@inertiajs/react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import SphereViewer from '@/components/SphereViewer'
@@ -11,9 +11,14 @@ interface TourShowProps {
 }
 
 export default function Show({ tour }: TourShowProps) {
-  const [currentIndex, setCurrentIndex] = useState(0)
+  // Pilih index pertama yang memiliki media panorama
+  const initialIndex = tour.spheres.findIndex(s => Array.isArray(s.media) && s.media.length > 0)
+  const safeIndex = initialIndex >= 0 ? initialIndex : 0
+
+  const [currentIndex, setCurrentIndex] = useState<number>(safeIndex)
   const tabsRef = useRef<HTMLDivElement>(null)
 
+  // Scroll active tab ke tengah saat index berubah
   useEffect(() => {
     const tabs = tabsRef.current
     const active = tabs?.children[currentIndex] as HTMLElement
@@ -25,6 +30,9 @@ export default function Show({ tour }: TourShowProps) {
   }
 
   const sphere = tour.spheres[currentIndex]
+
+  // Jika tidak ada media di sphere, tampilkan placeholder
+  const hasMedia = Array.isArray(sphere?.media) && sphere.media.length > 0
 
   if (!sphere) {
     return (
@@ -54,45 +62,41 @@ export default function Show({ tour }: TourShowProps) {
         </div>
 
         <div className="relative border-b mb-4">
-          <button
-            onClick={() => scrollTabs(-200)}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 p-2"
-          >
+          <button onClick={() => scrollTabs(-200)} className="absolute left-0 top-1/2 transform -translate-y-1/2 p-2">
             <ChevronLeft />
           </button>
-          <div
-            ref={tabsRef}
-            className="overflow-x-auto whitespace-nowrap scroll-smooth px-10 py-3"
-          >
+          <div ref={tabsRef} className="overflow-x-auto whitespace-nowrap scroll-smooth px-10 py-3">
             {tour.spheres.map((s, idx) => (
               <button
                 key={s.id}
                 onClick={() => setCurrentIndex(idx)}
-                className={`inline-block px-4 py-1 mr-4 rounded-full text-xs font-medium ${idx === currentIndex
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 hover:bg-blue-100'
-                  }`}
+                className={`inline-block px-4 py-1 mr-4 rounded-full text-xs font-medium ${
+                  idx === currentIndex ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-blue-100'
+                }`}
               >
                 {s.name}
               </button>
             ))}
           </div>
-          <button
-            onClick={() => scrollTabs(200)}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 p-2"
-          >
+          <button onClick={() => scrollTabs(200)} className="absolute right-0 top-1/2 transform -translate-y-1/2 p-2">
             <ChevronRight />
           </button>
         </div>
 
-        <SphereViewer
-          sphere={sphere}
-          initialYaw={sphere.initial_yaw}
-          onNavigateSphere={(targetId) => {
-            const idx = tour.spheres.findIndex(s => s.id === targetId)
-            if (idx !== -1) setCurrentIndex(idx)
-          }}
-        />
+        {hasMedia ? (
+          <SphereViewer
+            sphere={sphere}
+            initialYaw={sphere.initial_yaw}
+            onNavigateSphere={targetId => {
+              const idx = tour.spheres.findIndex(s => s.id === targetId)
+              if (idx !== -1) setCurrentIndex(idx)
+            }}
+          />
+        ) : (
+          <div className="w-full h-[420px] md:h-[500px] bg-gray-100 flex items-center justify-center">
+            <span className="text-gray-500">Media panorama tidak tersedia untuk sphere ini.</span>
+          </div>
+        )}
 
         <div className="px-6 py-4">
           <strong>Hotspots:</strong>
