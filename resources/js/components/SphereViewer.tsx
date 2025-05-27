@@ -19,6 +19,7 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
     const viewerRef = useRef<Viewer | null>(null)
     const autorotateRef = useRef<AutorotatePlugin | null>(null)
     const [autoRotate] = useState(false)
+    const [mounted, setMounted] = useState(false)
     const toRad = (deg: number) => (deg * Math.PI) / 180
 
     const panoramaUrl = sphere.media.find(
@@ -26,6 +27,11 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
     )?.original_url || sphere.media[0]?.original_url || ''
 
     useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    useEffect(() => {
+        if (!mounted) return
         if (!containerRef.current || !panoramaUrl) return
 
         if (viewerRef.current) {
@@ -119,7 +125,8 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
                 viewerRef.current = null
             }
         }
-    }, [sphere, onNavigateSphere, panoramaUrl, initialYaw, autoRotate])
+    }, [mounted, sphere, onNavigateSphere, panoramaUrl, initialYaw, autoRotate])
+
     return (
         <div className="relative">
             {!panoramaUrl ? (
