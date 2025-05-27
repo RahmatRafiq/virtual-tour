@@ -19,14 +19,55 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
     const viewerRef = useRef<Viewer | null>(null)
     const autorotateRef = useRef<AutorotatePlugin | null>(null)
     const [autoRotate] = useState(false)
+    const [mounted, setMounted] = useState(false)
     const toRad = (deg: number) => (deg * Math.PI) / 180
 
+    const panoramaUrl = sphere.media.find(
+        m => m.mime_type?.startsWith('image/')
+    )?.original_url || sphere.media[0]?.original_url || ''
+
     useEffect(() => {
-        if (!containerRef.current) return
+        setMounted(true)
+    }, [])
+
+    useEffect(() => {
+        if (!mounted) return
+        if (!containerRef.current || !panoramaUrl) return
+
+        if (viewerRef.current) {
+            const viewer = viewerRef.current
+            const markers = viewer.getPlugin(
+                MarkersPlugin as unknown as PluginConstructor
+            ) as unknown as MarkersPluginWithEvents
+
+            viewer.setPanorama(panoramaUrl).then(() => {
+                markers.clearMarkers()
+                sphere.hotspots.forEach(h => {
+                    const el = document.createElement('div')
+                    createRoot(el).render(<HotspotMarker hotspot={h} />)
+                    markers.addMarker({
+                        id: String(h.id),
+                        position: { yaw: toRad(h.yaw), pitch: toRad(h.pitch) },
+                        element: el,
+                        anchor: 'center bottom',
+                    })
+                })
+                if (autorotateRef.current) {
+                    if (autoRotate) {
+                        autorotateRef.current.start()
+                        viewer.setOptions({ mousemove: true, mousewheel: true })
+                    } else {
+                        autorotateRef.current.stop()
+                    }
+                }
+                viewer.rotate({ yaw: toRad(initialYaw), pitch: 0 })
+            })
+            return
+        }
 
         const viewer = new Viewer({
             container: containerRef.current,
-            panorama: sphere.media[0]?.original_url || '',
+            panorama: panoramaUrl,
             plugins: [
                 [MarkersPlugin as unknown as PluginConstructor, {}],
                 [AutorotatePlugin, { autostartDelay: null, autostartOnIdle: false, autorotatePitch: 0 }],
@@ -51,51 +92,51 @@ export default function SphereViewer({ sphere, initialYaw = 0, onNavigateSphere 
             }
         })
 
-        return () => {
-            viewer.destroy()
-        }
-    }, [sphere, onNavigateSphere])
-
-    useEffect(() => {
-        const viewer = viewerRef.current
-        if (!viewer) return
-
-        const markers = viewer.getPlugin(
-            MarkersPlugin as unknown as PluginConstructor
-        ) as unknown as MarkersPluginWithEvents
-
-        viewer.setPanorama(sphere.media[0]?.original_url || '')
-            .then(() => {
-                viewer.rotate({ yaw: toRad(initialYaw), pitch: 0 })
-                markers.clearMarkers()
-                sphere.hotspots.forEach(h => {
-                    const el = document.createElement('div')
-                    createRoot(el).render(<HotspotMarker hotspot={h} />)
-                    markers.addMarker({
-                        id: String(h.id),
-                        position: { yaw: toRad(h.yaw), pitch: toRad(h.pitch) },
-                        element: el,
-                        anchor: 'center bottom',
-                    })
+        viewer.addEventListener('ready', () => {
+            markers.clearMarkers()
+            sphere.hotspots.forEach(h => {
+                const el = document.createElement('div')
+                createRoot(el).render(<HotspotMarker hotspot={h} />)
+                markers.addMarker({
+                    id: String(h.id),
+                    position: { yaw: toRad(h.yaw), pitch: toRad(h.pitch) },
+                    element: el,
+                    anchor: 'center bottom',
                 })
-                if (autorotateRef.current) {
-                    if (autoRotate) {
-                        autorotateRef.current.start()
-                        viewer.setOptions({ mousemove: true, mousewheel: true })
-                    } else {
-                        autorotateRef.current.stop()
-                    }
-                }
             })
-            .catch(console.error)
-    }, [sphere, initialYaw, autoRotate])
+            if (autorotateRef.current) {
+                if (autoRotate) {
+                    autorotateRef.current.start()
+                    viewer.setOptions({ mousemove: true, mousewheel: true })
+                } else {
+                    autorotateRef.current.stop()
+                }
+            }
+            viewer.rotate({ yaw: toRad(initialYaw), pitch: 0 })
+        })
+
+        return () => {
+            if (viewerRef.current) {
+                try {
+                    viewerRef.current.destroy()
+                } catch (e) {
+                    console.warn('Error saat destroy viewer:', e)
+                }
+                viewerRef.current = null
+            }
+        }
+    }, [mounted, sphere, onNavigateSphere, panoramaUrl, initialYaw, autoRotate])
 
     return (
         <div className="relative">
-            <div
-                ref={containerRef}
-                className="w-full h-[420px] md:h-[500px] bg-black rounded-lg overflow-hidden"
-            />
+            {!panoramaUrl ? (
+                <div>Panorama tidak ditemukan untuk sphere ini.</div>
+            ) : (
+                <div
+                    ref={containerRef}
+                    className="w-full h-[420px] md:h-[500px] bg-black rounded-lg overflow-hidden"
+                />
+            )}
         </div>
     )
 }

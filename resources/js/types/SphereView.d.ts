@@ -19,7 +19,10 @@ export interface Sphere {
   id: number;
   name: string;
   initial_yaw: number;
-  media: Array<{ original_url: string }>;
+  media: Array<{
+    original_url: string;
+    mime_type?: string; 
+  }>;
   sphere_file: string;
   sphere_image: string;
   hotspots: Hotspot[];

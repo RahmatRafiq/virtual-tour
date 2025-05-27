@@ -11,6 +11,8 @@ Route::get('/articles', [\App\Http\Controllers\HomeController::class, 'allArticl
 Route::get('/articles/{article:slug}', [\App\Http\Controllers\HomeController::class, 'showArticle'])->name('articles.show');
 Route::get('/tours/{virtualTour}', [\App\Http\Controllers\HomeController::class, 'showVirtualTour'])->name('tours.show');
 
+Route::get('/embed/tour/{tour}', [\App\Http\Controllers\EmbedController::class, 'show'])->name('embed.tour.show');
+
 Route::get('auth/{provider}', [SocialAuthController::class, 'redirectToProvider'])->name('auth.redirect');
 Route::get('auth/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback'])->name('auth.callback');
 
