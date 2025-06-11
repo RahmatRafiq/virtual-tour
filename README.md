@@ -180,3 +180,4 @@ useEffect(() => {
 ## Lisensi
 
 MIT License.
+. 
